@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Scroll-driven personal portfolio: a full-screen story led by a 3D-style cartoon face that sneezes in Tamil, English and Hindi.">
+<title>Nithish Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Bangers&family=DM+Sans:wght@400;500;700&family=Noto+Sans+Devanagari:wght@500;800&family=Noto+Sans+Tamil:wght@500;800&family=Outfit:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<!-- Fixed full-screen world: backdrops, giant words, the face. Built and driven by app.js -->
+<div class="world" id="world" aria-hidden="true"></div>
+<div class="giant" id="giant" aria-hidden="true"></div>
+<div class="rays" id="rays" aria-hidden="true"></div>
+
+<div class="face-wrap" id="faceWrap">
+  <canvas class="face3d" id="face3d" aria-hidden="true"></canvas>
+  <button class="nose3d" id="nose3d" type="button" aria-label="Nose. Press to tickle it." hidden></button>
+  <svg id="face" viewBox="0 0 400 460" preserveAspectRatio="xMidYMax meet" role="img"
+       aria-label="Roblox-style 3D portrait of Nithish with black hair, large navy glasses and a white tee"
+       data-eye="open" data-mouth="smile" data-brow="idle" data-hand="false">
+    <defs>
+      <radialGradient id="gSkin" cx=".42" cy=".34" r=".78"><stop offset="0" stop-color="#F8D0A9"/><stop offset=".5" stop-color="#E3AC84"/><stop offset="1" stop-color="#B27553"/></radialGradient>
+      <radialGradient id="gSkin2" cx=".4" cy=".3" r=".8"><stop offset="0" stop-color="#E9B78F"/><stop offset="1" stop-color="#A56B4A"/></radialGradient>
+      <linearGradient id="gHair" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4B3B32"/><stop offset=".55" stop-color="#2A211C"/><stop offset="1" stop-color="#120E0B"/></linearGradient>
+      <linearGradient id="gShirt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#BCC4D6"/></linearGradient>
+      <linearGradient id="gLens" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".34"/><stop offset=".45" stop-color="#fff" stop-opacity=".05"/><stop offset="1" stop-color="#FF8309" stop-opacity=".16"/></linearGradient>
+      <linearGradient id="gFrame" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3A4358"/><stop offset=".5" stop-color="#151B28"/><stop offset="1" stop-color="#0B0F18"/></linearGradient>
+      <linearGradient id="gRim" x1="0" y1="0" x2="1" y2="0"><stop offset=".62" stop-color="#FF8309" stop-opacity="0"/><stop offset="1" stop-color="#FF8309" stop-opacity=".75"/></linearGradient>
+      <linearGradient id="gNeck" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7A4A33"/><stop offset=".6" stop-color="#C88D67"/><stop offset="1" stop-color="#D79A74"/></linearGradient>
+      <filter id="fBlur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="7"/></filter>
+      <filter id="fBlur2" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3"/></filter>
+      <clipPath id="cHead"><path d="M200 82 C286 82 322 142 320 216 C318 292 282 346 200 352 C118 346 82 292 80 216 C78 142 114 82 200 82Z"/></clipPath>
+    </defs>
+    <g id="bodyG">
+      <path d="M172 296 L172 404 L228 404 L228 296Z" fill="url(#gNeck)"/>
+      <path d="M-30 470 C-10 420 80 386 160 366 Q200 412 240 366 C320 386 410 420 430 470Z" fill="url(#gShirt)"/>
+      <path d="M60 440 C90 410 130 394 160 388 M340 440 C310 410 270 394 240 388" fill="none" stroke="#9AA3BA" stroke-width="5" stroke-linecap="round" opacity=".55"/>
+      <path d="M160 366 Q200 412 240 366" fill="none" stroke="#A7B0C6" stroke-width="7" stroke-linecap="round"/>
+      <path d="M-30 470 C-10 420 80 386 160 366 Q200 412 240 366 C320 386 410 420 430 470Z" fill="url(#gRim)"/>
+      <path d="M170 372 Q200 392 230 372 Q200 420 170 372Z" fill="#8B5A40" opacity=".35"/>
+      <g id="hand">
+        <path d="M356 470 L342 366" stroke="#A56B4A" stroke-width="36" stroke-linecap="round"/>
+        <path d="M356 470 L342 366" stroke="url(#gSkin2)" stroke-width="30" stroke-linecap="round"/>
+        <g stroke="#A56B4A" stroke-width="18" stroke-linecap="round"><path d="M326 350 L320 304"/><path d="M339 346 L338 296"/><path d="M352 348 L356 300"/><path d="M364 354 L372 316"/><path d="M318 370 L296 350"/></g>
+        <g stroke="#E3AC84" stroke-width="12" stroke-linecap="round"><path d="M326 350 L320 304"/><path d="M339 346 L338 296"/><path d="M352 348 L356 300"/><path d="M364 354 L372 316"/><path d="M318 370 L296 350"/></g>
+        <ellipse cx="342" cy="360" rx="29" ry="27" fill="url(#gSkin)"/>
+      </g>
+    </g>
+    <g id="breathe"><g id="snapG"><g id="headG">
+      <g id="gEars">
+        <ellipse cx="82" cy="228" rx="20" ry="27" fill="url(#gSkin2)"/><ellipse cx="318" cy="228" rx="20" ry="27" fill="url(#gSkin2)"/>
+        <path d="M84 216 q-9 11 0 26 M316 216 q9 11 0 26" fill="none" stroke="#9A6140" stroke-width="4" stroke-linecap="round"/>
+        <path d="M80 250 C84 330 110 372 126 396 M320 250 C316 330 290 372 274 396" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".9"/>
+      </g>
+      <path d="M200 82 C286 82 322 142 320 216 C318 292 282 346 200 352 C118 346 82 292 80 216 C78 142 114 82 200 82Z" fill="url(#gSkin)"/>
+      <g clip-path="url(#cHead)">
+        <path d="M96 240 C100 308 144 346 200 350 C256 346 300 308 304 240 C290 300 250 326 200 328 C150 326 110 300 96 240Z" fill="#5E3624" opacity=".28" filter="url(#fBlur2)"/>
+        <ellipse cx="170" cy="130" rx="54" ry="22" fill="#fff" opacity=".3" filter="url(#fBlur)"/>
+        <ellipse cx="128" cy="262" rx="26" ry="18" fill="#fff" opacity=".2" filter="url(#fBlur)"/>
+        <ellipse cx="272" cy="262" rx="26" ry="18" fill="#fff" opacity=".14" filter="url(#fBlur)"/>
+        <rect x="270" y="80" width="60" height="280" fill="url(#gRim)" opacity=".5"/>
+      </g>
+      <ellipse class="cheek" cx="124" cy="282" rx="22" ry="13" fill="#FF8309" opacity=".3" filter="url(#fBlur2)"/>
+      <ellipse class="cheek" cx="276" cy="282" rx="22" ry="13" fill="#FF8309" opacity=".3" filter="url(#fBlur2)"/>
+      <g id="gHair">
+        <path d="M74 226 C54 128 116 50 200 50 C284 50 346 128 326 226 C320 198 314 180 306 164 L292 178 L280 150 L262 172 L246 140 L226 168 L206 138 L186 166 L166 140 L148 170 L130 146 L114 178 L100 172 C90 188 80 206 74 226Z" fill="url(#gHair)"/>
+        <path d="M100 100 C130 64 190 56 232 62" fill="none" stroke="#7A6355" stroke-width="7" stroke-linecap="round" opacity=".7"/>
+        <path d="M130 120 Q160 100 192 104 M214 98 Q250 92 276 112" fill="none" stroke="#6A5547" stroke-width="5" stroke-linecap="round" opacity=".6"/>
+        <path d="M278 70 C318 92 332 150 322 214" fill="none" stroke="#FF8309" stroke-width="5" stroke-linecap="round" opacity=".6"/>
+      </g>
+      <g id="gFeat">
+        <g class="e-open">
+          <ellipse cx="150" cy="228" rx="19" ry="16" fill="#fff"/><ellipse cx="250" cy="228" rx="19" ry="16" fill="#fff"/>
+          <ellipse cx="150" cy="218" rx="19" ry="7" fill="#9AA3BA" opacity=".35"/><ellipse cx="250" cy="218" rx="19" ry="7" fill="#9AA3BA" opacity=".35"/>
+          <g class="pup"><circle cx="150" cy="230" r="10.5" fill="#3A2013"/><circle cx="150" cy="230" r="6" fill="#140A05"/><circle cx="154" cy="225.5" r="3.4" fill="#fff"/></g>
+          <g class="pup"><circle cx="250" cy="230" r="10.5" fill="#3A2013"/><circle cx="250" cy="230" r="6" fill="#140A05"/><circle cx="254" cy="225.5" r="3.4" fill="#fff"/></g>
+        </g>
+        <g class="e-squint" fill="none" stroke="#2A211C" stroke-width="6" stroke-linecap="round"><path d="M130 230 Q150 220 170 230"/><path d="M230 230 Q250 220 270 230"/></g>
+        <g class="e-closed" fill="none" stroke="#2A211C" stroke-width="6" stroke-linecap="round"><path d="M130 228 Q150 242 170 228"/><path d="M230 228 Q250 242 270 228"/></g>
+        <g class="e-scrunch" fill="none" stroke="#2A211C" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"><path d="M134 212 L164 228 L134 244"/><path d="M266 212 L236 228 L266 244"/></g>
+        <g id="browL"><path d="M118 186 Q150 170 184 186" fill="none" stroke="#1D1410" stroke-width="10" stroke-linecap="round"/></g>
+        <g id="browR"><path d="M216 186 Q250 170 282 186" fill="none" stroke="#1D1410" stroke-width="10" stroke-linecap="round"/></g>
+        <g id="glasses">
+          <g fill="url(#gLens)" stroke="url(#gFrame)" stroke-width="9" stroke-linejoin="round"><rect x="104" y="198" width="90" height="62" rx="17"/><rect x="206" y="198" width="90" height="62" rx="17"/></g>
+          <g fill="none" stroke="url(#gFrame)" stroke-width="7" stroke-linecap="round"><path d="M194 214 Q200 206 206 214"/><path d="M104 214 L82 220"/><path d="M296 214 L318 220"/></g>
+          <path d="M116 206 L140 206 M218 206 L242 206" stroke="#fff" stroke-opacity=".7" stroke-width="4" stroke-linecap="round"/>
+        </g>
+        <g class="mouth">
+          <g class="m-smile"><path d="M168 306 Q200 330 232 306" fill="none" stroke="#7A3E36" stroke-width="5.5" stroke-linecap="round"/></g>
+          <g class="m-small"><path d="M180 312 Q198 320 222 306" fill="none" stroke="#7A3E36" stroke-width="5.5" stroke-linecap="round"/></g>
+          <g class="m-flat"><path d="M182 312 L218 312" fill="none" stroke="#7A3E36" stroke-width="5.5" stroke-linecap="round"/></g>
+          <g class="m-grin"><path d="M164 302 Q200 342 236 302 Q200 310 164 302Z" fill="#5B2B26" stroke="#5B2B26" stroke-width="3" stroke-linejoin="round"/><path d="M171 304 Q200 312 229 304 Q200 317 171 304Z" fill="#fff"/><path d="M184 326 Q200 334 216 326 Q200 322 184 326Z" fill="#C4605A"/></g>
+          <g class="m-open"><ellipse cx="200" cy="322" rx="27" ry="25" fill="#4B201D"/><path d="M175 300 L225 300 L222 309 Q200 315 178 309Z" fill="#fff"/><ellipse cx="200" cy="337" rx="16" ry="9" fill="#C4605A"/></g>
+          <g class="m-yawn"><ellipse cx="200" cy="324" rx="17" ry="22" fill="#4B201D"/><ellipse cx="200" cy="336" rx="10" ry="6" fill="#C4605A"/></g>
+          <g class="m-wobble"><path d="M170 312 q7 -9 15 0 t15 0 t15 0 t15 0" fill="none" stroke="#7A3E36" stroke-width="5.5" stroke-linecap="round"/></g>
+        </g>
+        <g id="nose" role="button" tabindex="0" aria-label="Nose. Press to tickle it.">
+          <path d="M193 238 Q190 264 184 276" fill="none" stroke="#B57652" stroke-width="3.5" stroke-linecap="round" opacity=".7"/>
+          <ellipse cx="200" cy="278" rx="23" ry="17" fill="#D79A72"/><ellipse cx="200" cy="278" rx="23" ry="17" fill="url(#gSkin)" opacity=".7"/>
+          <ellipse cx="193" cy="270" rx="9" ry="5" fill="#fff" opacity=".5" filter="url(#fBlur2)"/>
+          <ellipse cx="190" cy="283" rx="4.8" ry="3.4" fill="#5E3624"/><ellipse cx="210" cy="283" rx="4.8" ry="3.4" fill="#5E3624"/>
+          <circle class="hintring" cx="200" cy="272" r="6" fill="none" stroke="#FF8309" stroke-width="3"/>
+          <circle class="hintdot" cx="200" cy="272" r="5.5" fill="#FF8309" stroke="#fff" stroke-width="2"/>
+          <circle cx="200" cy="276" r="40" fill="transparent"/>
+        </g>
+        <g id="spray" fill="#EAF6F8" stroke="#1A2130" stroke-width="2">
+          <circle class="drop" cx="200" cy="296" r="6" style="--dx:-120px;--dy:60px"/><circle class="drop" cx="200" cy="296" r="4" style="--dx:-60px;--dy:110px"/>
+          <circle class="drop" cx="200" cy="296" r="7" style="--dx:0px;--dy:140px"/><circle class="drop" cx="200" cy="296" r="4" style="--dx:62px;--dy:112px"/>
+          <circle class="drop" cx="200" cy="296" r="6" style="--dx:122px;--dy:62px"/><circle class="drop" cx="200" cy="296" r="3" style="--dx:-24px;--dy:90px"/>
+        </g>
+      </g>
+    </g></g></g>
+  </svg>
+  <div class="zzz" id="zzz" aria-hidden="true"><b>Z</b><b>z</b><b>z</b></div>
+  <button class="hint" id="hint" type="button"><span id="hintT">Tickle my nose</span><span class="meter"><i></i></span></button>
+</div>
+<canvas class="embers" id="embers" aria-hidden="true"></canvas>
+
+<div class="progress" id="progress" aria-hidden="true"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="bubbles" id="bubbles" aria-hidden="true"></div>
+<div class="flash" id="flash" aria-hidden="true"></div>
+
+<header class="top">
+  <a class="brand" href="#home"><i></i>Nithish</a>
+  <nav class="nav" id="nav" aria-label="Sections"></nav>
+  <div class="tools">
+    <span class="chip sneezes" id="sneezeChip" title="How many times you have made me sneeze">Sneezes <b id="sneezeN">0</b></span>
+    <button class="tool" id="soundBtn" type="button" aria-pressed="false">Sound off</button>
+    <button class="tool" id="askBtn" type="button" aria-haspopup="dialog"><span>Ask me</span><kbd id="askKbd">K</kbd></button>
+    <a class="pill-cta" href="#contact">Say hello</a>
+  </div>
+</header>
+
+<div class="dock">
+  <span class="clock" id="clock"><i></i><span id="clockT"></span></span>
+  <div class="dots" id="dots"></div>
+  <span class="count" id="count" aria-hidden="true"><b id="cn">01</b> / 07 <span id="cl">Home</span></span>
+</div>
+
+<main id="main">
+  <section class="scene" id="home" data-sec="home" aria-labelledby="h-home">
+    <div class="home-copy">
+      <p class="kicker" id="hello">Welcome</p>
+      <h1 id="h-home"><span class="sr-only">Nithish. </span>AI-first builder and operator.</h1>
+      <p class="rotor" id="rotor"><span class="sr-only">I build campaigns, AI agents and more.</span><span aria-hidden="true">Right now I'm building <b id="rotW"></b><i class="caret"></i></span></p>
+      <p class="pitch" id="pitch"></p>
+      <div class="row">
+        <a class="btn" href="#projects">See my work</a>
+        <a class="btn ghost" href="#contact">Say hello</a>
+      </div>
+    </div>
+    <div class="home-now" id="nowStrip"></div>
+  </section>
+
+  <section class="scene" id="about" data-sec="about" data-side="left" aria-labelledby="h-about">
+    <div class="col">
+      <div class="head"><p class="kicker">01 · About</p><h2 id="h-about">Hello, I'm Nithish.</h2></div>
+      <div class="panel">
+        <div id="bio" class="stack"></div>
+        <div class="chips" id="facts"></div>
+        <h3 class="sub">Where I work</h3>
+        <div class="grid" id="exp"></div>
+        <h3 class="sub">Where I studied</h3>
+        <ul class="tl" id="edu"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" id="skills" data-sec="skills" data-side="right" aria-labelledby="h-skills">
+    <div class="col">
+      <div class="head"><p class="kicker">02 · Skills</p><h2 id="h-skills">What I bring.</h2></div>
+      <div class="panel">
+        <p class="lede">Strong where I have shipped real work. Beginner where I say so.</p>
+        <div class="tabs" id="skillTabs" role="group" aria-label="Skill groups"></div>
+        <div class="grid" id="skillGrid"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" id="learning" data-sec="learning" data-side="left" aria-labelledby="h-learning">
+    <div class="col">
+      <div class="head"><p class="kicker">03 · Learning journey</p><h2 id="h-learning">How I got here.</h2></div>
+      <div class="panel">
+        <p class="lede">Momentum matters more than a perfect CV. This is what I picked up, and what is next.</p>
+        <ul class="tl" id="learnList"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" id="projects" data-sec="projects" data-side="right" data-wide aria-labelledby="h-projects">
+    <div class="col">
+      <div class="head"><p class="kicker">04 · Projects</p><h2 id="h-projects">Things I built.</h2></div>
+      <div class="panel">
+        <div class="tabs filter" id="projFilter" role="group" aria-label="Filter projects"></div>
+        <div class="grid" id="projGrid"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" id="languages" data-sec="languages" data-side="split" aria-labelledby="h-languages">
+    <div class="head wide"><p class="kicker">05 · Languages and personality</p><h2 id="h-languages">Four languages.</h2></div>
+    <div class="split">
+      <div class="panel">
+        <p class="lede">I sneeze in all four. Tickle my nose and see.</p>
+        <div class="row"><button class="btn" id="again" type="button">Tickle again</button></div>
+        <div class="stack" id="langGrid"></div>
+      </div>
+      <div class="panel">
+        <h3 class="sub first">How I am</h3>
+        <div class="stack" id="traits"></div>
+        <div class="card"><h3>How to work with me</h3><p id="wwm"></p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" id="contact" data-sec="contact" data-side="left" aria-labelledby="h-contact">
+    <div class="col">
+      <div class="head"><p class="kicker">06 · Contact</p><h2 id="h-contact">Say hello.</h2></div>
+      <div class="panel">
+        <p class="lede" id="avail"></p>
+        <form id="form" novalidate>
+          <div class="field" id="f-name"><label for="name">Name</label><input id="name" name="name" autocomplete="name" /><div class="err" id="e-name" aria-live="polite"></div></div>
+          <div class="field" id="f-email"><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" /><div class="err" id="e-email" aria-live="polite"></div></div>
+          <div class="field" id="f-msg"><label for="msg">Message</label><textarea id="msg" name="msg"></textarea><div class="err" id="e-msg" aria-live="polite"></div></div>
+          <button class="btn" type="submit">Send message</button>
+          <div class="status" id="status" role="status" hidden></div>
+        </form>
+        <div class="links" id="links"></div>
+        <div class="row two"><button class="btn ghost" id="cvBtn" type="button">Save my CV as PDF</button><a class="resume" id="resumeBtn" href="#contact" hidden>Open my resume</a></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot"><a href="#home">Back to top</a></footer>
+</main>
+
+<dialog id="dlg" aria-labelledby="dlgT"></dialog>
+<dialog id="palette" aria-label="Command menu and questions">
+  <div class="pal">
+    <div class="pal-top">
+      <input id="palIn" type="text" role="combobox" aria-expanded="true" aria-controls="palList" aria-autocomplete="list" autocomplete="off" spellcheck="false" placeholder="Jump somewhere, or ask me something" aria-label="Search or ask a question">
+      <button class="pal-x" id="palX" type="button">Esc</button>
+    </div>
+    <ul id="palList" role="listbox" aria-label="Results"></ul>
+    <div class="pal-answer" id="palAns" hidden></div>
+    <p class="pal-foot">Answers come from the content on this page. This is a prepared-answer box, not a live AI.<span id="palSec"></span></p>
+  </div>
+</dialog>
+<div class="cv" id="cv" aria-hidden="true"></div>
+<div class="intro" id="intro" role="presentation">
+  <i class="cur c1"></i><i class="cur c2"></i>
+  <div class="intro-c">
+    <span class="iw" aria-hidden="true"><b style="--i:0">N</b><b style="--i:1">I</b><b style="--i:2">T</b><b style="--i:3">H</b><b style="--i:4">I</b><b style="--i:5">S</b><b style="--i:6">H</b><b class="dot" style="--i:7">.</b></span>
+    <span class="ib" aria-hidden="true"><i></i></span>
+    <button class="isk" id="introSkip" type="button">Skip intro</button>
+  </div>
+</div>
+<div class="sr-only" id="live" aria-live="polite"></div>
+
+<script src="content.js"></script>
+<script src="avatar3d.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
