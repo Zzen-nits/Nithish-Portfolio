@@ -3,7 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Scroll-driven personal portfolio: a full-screen story led by a 3D-style cartoon face that sneezes in Tamil, English and Hindi.">
+<meta name="description" content="Nithish: AI-first builder and operator. A scroll-driven portfolio led by a 3D cartoon version of me that sneezes in Tamil, English, Hindi and Nepali.">
+<meta name="theme-color" content="#1A2130">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Nithish: AI-first builder and operator">
+<meta property="og:description" content="Campaigns, agents and brand stories built with AI. Open to remote, AI-first roles.">
+<meta property="og:image" content="og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Nithish: AI-first builder and operator">
+<meta name="twitter:description" content="Campaigns, agents and brand stories built with AI. Open to remote, AI-first roles.">
+<meta name="twitter:image" content="og-image.png">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
 <title>Nithish Portfolio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Bangers&family=DM+Sans:wght@400;500;700&family=Noto+Sans+Devanagari:wght@500;800&family=Noto+Sans+Tamil:wght@500;800&family=Outfit:wght@500;600;700&display=swap">
@@ -16,10 +29,15 @@
 <div class="world" id="world" aria-hidden="true"></div>
 <div class="giant" id="giant" aria-hidden="true"></div>
 <div class="rays" id="rays" aria-hidden="true"></div>
+<button class="sunbtn" id="sunBtn" type="button" tabindex="-1" aria-hidden="true"></button>
 
 <div class="face-wrap" id="faceWrap">
   <canvas class="face3d" id="face3d" aria-hidden="true"></canvas>
-  <button class="nose3d" id="nose3d" type="button" aria-label="Nose. Press to tickle it." hidden></button>
+  <button class="spot spot-hair" id="spotHair" type="button" tabindex="-1" aria-hidden="true" hidden></button>
+  <button class="spot spot-glasses" id="spotGlasses" type="button" tabindex="-1" aria-hidden="true" hidden></button>
+  <button class="spot spot-glasses2" id="spotGlasses2" type="button" tabindex="-1" aria-hidden="true" hidden></button>
+  <button class="spot spot-chest" id="spotChest" type="button" tabindex="-1" aria-hidden="true" hidden></button>
+  <button class="nose3d" id="nose3d" type="button" aria-label="Nose" hidden></button>
   <svg id="face" viewBox="0 0 400 460" preserveAspectRatio="xMidYMax meet" role="img"
        aria-label="Roblox-style 3D portrait of Nithish with black hair, large navy glasses and a white tee"
        data-eye="open" data-mouth="smile" data-brow="idle" data-hand="false">
@@ -55,7 +73,6 @@
       <g id="gEars">
         <ellipse cx="82" cy="228" rx="20" ry="27" fill="url(#gSkin2)"/><ellipse cx="318" cy="228" rx="20" ry="27" fill="url(#gSkin2)"/>
         <path d="M84 216 q-9 11 0 26 M316 216 q9 11 0 26" fill="none" stroke="#9A6140" stroke-width="4" stroke-linecap="round"/>
-        <path d="M80 250 C84 330 110 372 126 396 M320 250 C316 330 290 372 274 396" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".9"/>
       </g>
       <path d="M200 82 C286 82 322 142 320 216 C318 292 282 346 200 352 C118 346 82 292 80 216 C78 142 114 82 200 82Z" fill="url(#gSkin)"/>
       <g clip-path="url(#cHead)">
@@ -99,13 +116,12 @@
           <g class="m-yawn"><ellipse cx="200" cy="324" rx="17" ry="22" fill="#4B201D"/><ellipse cx="200" cy="336" rx="10" ry="6" fill="#C4605A"/></g>
           <g class="m-wobble"><path d="M170 312 q7 -9 15 0 t15 0 t15 0 t15 0" fill="none" stroke="#7A3E36" stroke-width="5.5" stroke-linecap="round"/></g>
         </g>
-        <g id="nose" role="button" tabindex="0" aria-label="Nose. Press to tickle it.">
+        <g id="nose" role="button" tabindex="0" aria-label="Nose">
           <path d="M193 238 Q190 264 184 276" fill="none" stroke="#B57652" stroke-width="3.5" stroke-linecap="round" opacity=".7"/>
           <ellipse cx="200" cy="278" rx="23" ry="17" fill="#D79A72"/><ellipse cx="200" cy="278" rx="23" ry="17" fill="url(#gSkin)" opacity=".7"/>
           <ellipse cx="193" cy="270" rx="9" ry="5" fill="#fff" opacity=".5" filter="url(#fBlur2)"/>
           <ellipse cx="190" cy="283" rx="4.8" ry="3.4" fill="#5E3624"/><ellipse cx="210" cy="283" rx="4.8" ry="3.4" fill="#5E3624"/>
-          <circle class="hintring" cx="200" cy="272" r="6" fill="none" stroke="#FF8309" stroke-width="3"/>
-          <circle class="hintdot" cx="200" cy="272" r="5.5" fill="#FF8309" stroke="#fff" stroke-width="2"/>
+
           <circle cx="200" cy="276" r="40" fill="transparent"/>
         </g>
         <g id="spray" fill="#EAF6F8" stroke="#1A2130" stroke-width="2">
@@ -130,6 +146,7 @@
   <a class="brand" href="#home"><i></i>Nithish</a>
   <nav class="nav" id="nav" aria-label="Sections"></nav>
   <div class="tools">
+    <button class="chip secrets" id="secChip" type="button" title="Secrets you have found. Click for a hint.">Secrets <b id="secN">0</b></button>
     <span class="chip sneezes" id="sneezeChip" title="How many times you have made me sneeze">Sneezes <b id="sneezeN">0</b></span>
     <button class="tool" id="soundBtn" type="button" aria-pressed="false">Sound off</button>
     <button class="tool" id="askBtn" type="button" aria-haspopup="dialog"><span>Ask me</span><kbd id="askKbd">K</kbd></button>
@@ -139,8 +156,7 @@
 
 <div class="dock">
   <span class="clock" id="clock"><i></i><span id="clockT"></span></span>
-  <div class="dots" id="dots"></div>
-  <span class="count" id="count" aria-hidden="true"><b id="cn">01</b> / 07 <span id="cl">Home</span></span>
+  <span class="count" id="count" aria-hidden="true"><b id="cn">01</b> / <span id="cm">08</span> <span id="cl">Home</span></span>
 </div>
 
 <main id="main">
@@ -153,6 +169,7 @@
       <div class="row">
         <a class="btn" href="#projects">See my work</a>
         <a class="btn ghost" href="#contact">Say hello</a>
+        <button class="btn ghost" id="hearHello" type="button" hidden>Hear my hello</button>
       </div>
     </div>
     <div class="home-now" id="nowStrip"></div>
@@ -162,12 +179,15 @@
     <div class="col">
       <div class="head"><p class="kicker">01 · About</p><h2 id="h-about">Hello, I'm Nithish.</h2></div>
       <div class="panel">
+        <div class="proof" id="proof"></div>
+        <div id="helloClip"></div>
         <div id="bio" class="stack"></div>
         <div class="chips" id="facts"></div>
         <h3 class="sub">Where I work</h3>
         <div class="grid" id="exp"></div>
         <h3 class="sub">Where I studied</h3>
         <ul class="tl" id="edu"></ul>
+        <div id="quotes"></div>
       </div>
     </div>
   </section>
@@ -183,9 +203,22 @@
     </div>
   </section>
 
-  <section class="scene" id="learning" data-sec="learning" data-side="left" aria-labelledby="h-learning">
+  <section class="scene" id="ai" data-sec="ai" data-side="left" aria-labelledby="h-ai">
     <div class="col">
-      <div class="head"><p class="kicker">03 · Learning journey</p><h2 id="h-learning">How I got here.</h2></div>
+      <div class="head"><p class="kicker">03 · How I work with AI</p><h2 id="h-ai">Me and AI.</h2></div>
+      <div class="panel">
+        <p class="lede" id="aiLede"></p>
+        <ol class="steps" id="aiSteps"></ol>
+        <h3 class="sub">Tools I use</h3>
+        <div class="chips" id="aiTools"></div>
+        <div class="ba" id="aiExample"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" id="learning" data-sec="learning" data-side="right" aria-labelledby="h-learning">
+    <div class="col">
+      <div class="head"><p class="kicker">04 · Learning journey</p><h2 id="h-learning">How I got here.</h2></div>
       <div class="panel">
         <p class="lede">Momentum matters more than a perfect CV. This is what I picked up, and what is next.</p>
         <ul class="tl" id="learnList"></ul>
@@ -193,9 +226,9 @@
     </div>
   </section>
 
-  <section class="scene" id="projects" data-sec="projects" data-side="right" data-wide aria-labelledby="h-projects">
+  <section class="scene" id="projects" data-sec="projects" data-side="left" data-wide aria-labelledby="h-projects">
     <div class="col">
-      <div class="head"><p class="kicker">04 · Projects</p><h2 id="h-projects">Things I built.</h2></div>
+      <div class="head"><p class="kicker">05 · Projects</p><h2 id="h-projects">Things I built.</h2></div>
       <div class="panel">
         <div class="tabs filter" id="projFilter" role="group" aria-label="Filter projects"></div>
         <div class="grid" id="projGrid"></div>
@@ -204,12 +237,12 @@
   </section>
 
   <section class="scene" id="languages" data-sec="languages" data-side="split" aria-labelledby="h-languages">
-    <div class="head wide"><p class="kicker">05 · Languages and personality</p><h2 id="h-languages">Four languages.</h2></div>
+    <div class="head wide"><p class="kicker">06 · Languages and personality</p><h2 id="h-languages">Four languages.</h2></div>
     <div class="split">
       <div class="panel">
-        <p class="lede">I sneeze in all four. Tickle my nose and see.</p>
-        <div class="row"><button class="btn" id="again" type="button">Tickle again</button></div>
+        <p class="lede">Four languages, and a few of them only come out by accident.</p>
         <div class="stack" id="langGrid"></div>
+        <div class="row"><button class="btn ghost" id="quizBtn" type="button">Test me: language quiz</button></div>
       </div>
       <div class="panel">
         <h3 class="sub first">How I am</h3>
@@ -221,7 +254,7 @@
 
   <section class="scene" id="contact" data-sec="contact" data-side="left" aria-labelledby="h-contact">
     <div class="col">
-      <div class="head"><p class="kicker">06 · Contact</p><h2 id="h-contact">Say hello.</h2></div>
+      <div class="head"><p class="kicker">07 · Contact</p><h2 id="h-contact">Say hello.</h2></div>
       <div class="panel">
         <p class="lede" id="avail"></p>
         <form id="form" novalidate>
@@ -229,6 +262,7 @@
           <div class="field" id="f-email"><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" /><div class="err" id="e-email" aria-live="polite"></div></div>
           <div class="field" id="f-msg"><label for="msg">Message</label><textarea id="msg" name="msg"></textarea><div class="err" id="e-msg" aria-live="polite"></div></div>
           <button class="btn" type="submit">Send message</button>
+          <p class="meta" id="formNote" hidden></p>
           <div class="status" id="status" role="status" hidden></div>
         </form>
         <div class="links" id="links"></div>
@@ -241,6 +275,7 @@
 </main>
 
 <dialog id="dlg" aria-labelledby="dlgT"></dialog>
+<dialog id="quiz" aria-labelledby="quizT"></dialog>
 <dialog id="palette" aria-label="Command menu and questions">
   <div class="pal">
     <div class="pal-top">

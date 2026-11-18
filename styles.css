@@ -175,13 +175,10 @@ body[data-sec="home"] .hint, body[data-sec="languages"] .hint { display: inline-
 .scrollcue i { width: 1.5px; height: 28px; background: #fff; transform-origin: top; animation: cue 1.6s ease-in-out infinite; }
 @keyframes cue { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); } 100% { transform: scaleY(0); transform-origin: bottom; } }
 body:not([data-sec="home"]) .scrollcue { opacity: 0; }
-.dots { display: flex; gap: 8px; padding: 6px; border-radius: 999px; background: rgba(26, 33, 48, .72); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--line); }
-.dots a { position: relative; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; text-decoration: none; font: 700 12px/1 var(--f-ui); color: #fff; background: var(--tb, var(--navy-3)); border: 2px solid rgba(255, 255, 255, .3); box-shadow: inset 0 0 0 40px rgba(26, 33, 48, .4); transition: transform .3s, border-color .3s; text-shadow: 0 1px 4px rgba(10, 14, 24, .7); }
-.dots a:hover { transform: translateY(-3px); }
-.dots a[aria-current="true"] { border-color: #fff; transform: scale(1.12); box-shadow: inset 0 0 0 40px rgba(26, 33, 48, .4), 0 0 0 3px var(--orange); }
 .count { min-width: 120px; text-align: right; font: 600 13px/1.2 var(--f-ui); letter-spacing: .1em; text-transform: uppercase; color: #fff; text-shadow: 0 1px 8px rgba(10, 14, 24, .7); }
 .count b { font: 400 26px/1 var(--f-head); letter-spacing: .02em; }
 .count span { display: block; font-size: 11px; opacity: .85; }
+.count #cm { display: inline; font-size: inherit; opacity: 1; }
 
 /* ---------- scenes ---------- */
 main { position: relative; z-index: 5; pointer-events: none; }
@@ -301,7 +298,6 @@ dialog dd { margin: 0; } dialog .btn.small { min-height: 40px; padding: 8px 18px
   .split { flex-direction: column; align-items: stretch; } .split .panel { width: 100%; }
   .head.wide h2 { max-width: none; }
   .hint { left: 50%; top: 80%; transform: translateX(-50%); }
-  .dots a { width: 36px; height: 36px; font-size: 11px; } .dots { gap: 5px; padding: 5px; }
   .scrollcue, .count span { display: none; } .count, .scrollcue { min-width: 0; }
   .count b { font-size: 20px; }
   .dock { padding: 10px 12px 14px; }
@@ -451,9 +447,116 @@ body.intro-on { overflow: hidden; }
 .face-wrap.is3d #face { visibility: hidden; }
 .nose3d { position: absolute; left: 50%; top: 50%; width: 60px; height: 60px; margin: -30px 0 0 -30px; padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer; pointer-events: auto; z-index: 2; }
 .nose3d[hidden] { display: none; }
-.nose3d::before { content: ""; position: absolute; left: 50%; top: 42%; width: 13px; height: 13px; margin: -6.5px 0 0 -6.5px; border-radius: 50%; background: #FF8309; border: 2px solid #fff; box-shadow: 0 0 0 0 rgba(255, 131, 9, .6); animation: n3pulse 1.8s ease-out infinite; }
-.face-wrap.used .nose3d::before { display: none; }
 .nose3d:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
 .nose3d.wiggle { animation: wiggle .35s ease-in-out; }
-@keyframes n3pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 131, 9, .6); } 100% { box-shadow: 0 0 0 16px rgba(255, 131, 9, 0); } }
-@media (prefers-reduced-motion: reduce) { .nose3d::before { animation: none; } }
+
+/* the sneeze is an easter egg: the pill only appears once it has been triggered */
+.hint { opacity: 0; visibility: hidden; transition: opacity .3s ease, visibility .3s; }
+.hint.show { opacity: 1; visibility: visible; }
+.chip.sneezes:not(.seen) { display: none; }
+
+/* ================= round 3: hidden spots, sun and moon, proof, AI scene, flip cards, quiz ================= */
+.spot { position: absolute; z-index: 1; padding: 0; border: 0; background: transparent; cursor: pointer; pointer-events: auto; transform: translate(-50%, -50%); -webkit-tap-highlight-color: transparent; border-radius: 40%; }
+.spot[hidden] { display: none; }
+.spot-glasses, .spot-glasses2 { z-index: 3; top: calc(var(--ny, 0) * 1px - var(--u, 0) * .26px); width: calc(var(--u, 0) * .88px); height: calc(var(--u, 0) * .72px); }
+.spot-glasses { left: calc(var(--nx, 0) * 1px - var(--u, 0) * .55px); }
+.spot-glasses2 { left: calc(var(--nx, 0) * 1px + var(--u, 0) * .55px); }
+.spot-hair { left: calc(var(--nx, 0) * 1px); top: calc(var(--ny, 0) * 1px - var(--u, 0) * 1.15px); width: calc(var(--u, 0) * 2.2px); height: calc(var(--u, 0) * 1px); border-radius: 50% 50% 30% 30%; }
+.spot-chest { left: calc(var(--nx, 0) * 1px); top: calc(var(--ny, 0) * 1px + var(--u, 0) * 1.9px); width: calc(var(--u, 0) * 2.2px); height: calc(var(--u, 0) * 1.5px); border-radius: 24%; }
+.nose3d { z-index: 2; }
+.sunbtn { position: fixed; z-index: 2; padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+#face.spin { animation: spinY 1.2s ease-in-out; }
+@keyframes spinY { to { rotate: y 360deg; } }
+
+/* day and night: the sky follows the clock in Coimbatore, and the sun becomes a moon */
+.bg .sun { transition: opacity 1.2s ease; }
+.bg .dusk { position: absolute; inset: 0; background: linear-gradient(180deg, #070B14, #131B2C 70%, #1A2130); opacity: 0; transition: opacity 1.2s ease; }
+.bg .stars { position: absolute; inset: 0; opacity: 0; background-repeat: no-repeat; transition: opacity 1.2s ease; }
+.bg .moon { position: absolute; overflow: hidden; border-radius: 50%; width: var(--d); height: var(--d); left: calc(50% + var(--sx, 0) * 100vw); top: var(--sy, 50%); margin: calc(var(--d) / -2) 0 0 calc(var(--d) / -2); opacity: 0; transition: opacity 1.2s ease; background: radial-gradient(circle at 38% 34%, #FFFFFF 0%, #EEF1F7 55%, #C3CADC 100%); box-shadow: 0 0 90px 24px rgba(255, 255, 255, .22); }
+.moon i { position: absolute; border-radius: 50%; background: rgba(26, 33, 48, .12); }
+.moon .c1 { width: 22%; height: 22%; left: 20%; top: 26%; } .moon .c2 { width: 14%; height: 14%; left: 58%; top: 18%; } .moon .c3 { width: 30%; height: 30%; left: 48%; top: 56%; }
+body.night .bg .dusk { opacity: .84; }
+body.night .bg .stars { opacity: 1; animation: twinkle 4s ease-in-out infinite alternate; }
+body.night .bg .moon { opacity: 1; }
+body.night .bg .sun { opacity: 0; }
+body.night .bg svg { filter: brightness(.58) saturate(.8); }
+body.night[data-sec] { --hl: #fff; }
+body.night .giant span { color: #fff !important; }
+@keyframes twinkle { from { opacity: .5; } to { opacity: 1; } }
+@media (max-width: 899px) { .bg .moon { left: 50% !important; top: 30svh !important; } }
+
+/* RoundU mode (triple-click the logo): everything orange */
+body.orange .bg { background: linear-gradient(180deg, #FF9B38, #FF8309) !important; }
+body.orange .bg .dusk, body.orange .bg .stars, body.orange .bg .moon { opacity: 0 !important; }
+body.orange .bg .sun { opacity: 1 !important; background: #fff !important; box-shadow: 0 0 120px 40px rgba(255, 255, 255, .35) !important; }
+body.orange .bg svg { filter: none; }
+body.orange .bg svg path { fill: #fff !important; fill-opacity: .2; }
+body.orange .home-now .tag { color: #fff; }
+body.orange[data-sec] { --hl: var(--navy); }
+body.orange .giant span { color: var(--navy) !important; }
+body.orange .home-copy h1, body.orange .pitch, body.orange .home-copy .kicker, body.orange .rotor, body.orange .home-now { color: var(--navy); text-shadow: none; }
+
+/* home: the Now panel */
+.home-now .nrow { display: grid; gap: 6px; justify-items: start; }
+
+/* about: proof tiles, hello clip, quotes */
+.proof { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: 10px; }
+.stat { padding: 14px 14px 12px; border-radius: 16px; background: rgba(255, 131, 9, .12); border: 1px solid rgba(255, 131, 9, .4); display: grid; gap: 6px; align-content: start; }
+.stat b { font: 400 clamp(30px, 3.2vw, 44px)/1 var(--f-head); color: var(--orange); }
+.stat span { font: 600 12px/1.3 var(--f-ui); letter-spacing: .05em; text-transform: uppercase; color: var(--ink2); }
+.hello { margin: 0; display: grid; gap: 8px; }
+.hello video, .hello iframe { width: 100%; aspect-ratio: 16 / 9; border-radius: 16px; border: 0; background: #000; }
+.hello audio { width: 100%; }
+.hello figcaption { color: var(--ink2); font-size: 15px; }
+.slot { border: 2px dashed var(--line); border-radius: 16px; padding: 16px 18px; color: var(--ink2); font-style: italic; font-size: 15px; }
+.quote { margin: 0; }
+.quote blockquote { margin: 0; font-size: 17px; }
+.quote figcaption { display: grid; gap: 2px; margin-top: 6px; font-size: 14px; color: var(--ink2); }
+.quote figcaption b { color: #fff; }
+
+/* scene 03: how I work with AI */
+.steps { list-style: none; padding: 0; display: grid; gap: 10px; }
+.steps li { display: grid; grid-template-columns: 42px 1fr; column-gap: 14px; row-gap: 2px; align-items: center; padding: 14px 16px; border-radius: 16px; background: rgba(255, 255, 255, .06); border: 1px solid var(--line); }
+.steps .n { grid-row: span 2; width: 42px; height: 42px; border-radius: 50%; background: var(--orange); color: var(--navy); display: grid; place-items: center; font: 400 22px/1 var(--f-head); }
+.steps b { font: 700 18px/1.25 var(--f-ui); }
+.ba-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: stretch; }
+.ba .k { font: 700 11px/1 var(--f-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--ink2); }
+.ba .card p { font-size: 15px; }
+.ba .after { background: rgba(255, 131, 9, .14); border-color: rgba(255, 131, 9, .5); }
+.ba .after .k { color: #FFB066; }
+.ba .arr { color: var(--orange); font-size: 28px; align-self: center; }
+@media (max-width: 560px) { .ba-row { grid-template-columns: 1fr; } .ba .arr { transform: rotate(90deg); justify-self: center; } }
+
+/* projects: filter chips, flip cards ("how I built it") */
+.card.project.flip { padding: 0; background: transparent; border: 0; display: block; }
+.flip-in { display: grid; transform-style: preserve-3d; transform: perspective(1100px) rotateY(0deg); transition: transform .75s cubic-bezier(.22, .8, .24, 1); }
+.flip.on .flip-in { transform: perspective(1100px) rotateY(180deg); }
+.card.project.flip .face { grid-area: 1 / 1; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 18px; border: 1px solid var(--line); background: rgba(255, 255, 255, .06); padding: 16px 18px; display: grid; gap: 8px; align-content: start; }
+.card.project.flip .face.back { transform: rotateY(180deg); background: rgba(255, 131, 9, .1); border-color: rgba(255, 131, 9, .45); }
+.project .chips { margin: 2px 0; }
+.acts { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-top: 4px; }
+.lnk { background: none; border: 0; padding: 6px 0; min-height: 36px; color: #FFB066; font: 700 14px/1 var(--f-ui); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.lnk:hover { color: #fff; }
+.lnk.strong { padding: 9px 16px; border-radius: 999px; background: var(--orange); color: var(--navy); text-decoration: none; }
+.lnk.strong:hover { background: var(--orange-hover); color: var(--navy); }
+.how { padding-left: 1.2em; display: grid; gap: 6px; color: var(--ink2); font-size: 15px; }
+
+/* language quiz */
+#quiz .qmeta { color: var(--ink2); font: 600 13px/1 var(--f-ui); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 10px; }
+#quiz .qq { font: 700 24px/1.3 var(--f-ui); margin-bottom: 16px; }
+#quiz .qq.big { font-size: 40px; margin-bottom: 8px; }
+#quiz .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+#quiz .opt { min-height: 64px; padding: 12px 14px; border-radius: 16px; border: 2px solid var(--line); background: rgba(255, 255, 255, .06); color: #fff; font: 800 24px/1.3 'Noto Sans Tamil', 'Noto Sans Devanagari', var(--f-ui); cursor: pointer; }
+#quiz .opt:hover:not(:disabled) { background: rgba(255, 255, 255, .14); }
+#quiz .opt:disabled { cursor: default; }
+#quiz .opt.ok { background: var(--orange); color: var(--navy); border-color: var(--orange); }
+#quiz .opt.no { opacity: .55; text-decoration: line-through; }
+#quiz .qfb { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; min-height: 28px; margin-bottom: 14px; }
+@media (max-width: 480px) { #quiz .opts { grid-template-columns: 1fr; } }
+
+/* hints for the secrets */
+button.chip.secrets { cursor: pointer; }
+button.chip.secrets:hover { border-color: var(--orange); }
+.chip.secrets:not(.seen) { display: none; }
+@media (max-width: 899px) { .chip.secrets { display: none; } }
+.btn[hidden], .chip[hidden] { display: none; }

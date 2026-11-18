@@ -36,17 +36,19 @@
   // fx: face centre as a fraction of viewport width from the middle. fs: face height as a fraction of viewport height.
   // sky: gradient stops. sun: colour, diameter (vmax), x as a fraction (follows the face), y %. hills: far, mid, near.
   var SCENES = [
-    { id: 'home', label: 'Home', word: 'NITHISH', fx: 0, fs: 1, fy: '7svh', state: 'idle', hl: '#FFFFFF', gc: '#FFFFFF', go: .2,
+    { id: 'home', label: 'Home', word: 'NITHISH', fx: 0, fs: 1, fy: '2svh', state: 'idle', hl: '#FFFFFF', gc: '#FFFFFF', go: .2,
       sky: ['#0C111C', '#1A2130 52%', '#6B3A1C'], sun: { c: '#FF8309', d: 64, x: 0, y: 46 }, hills: ['#26304A', '#1C2438', '#121826'], tb: 'linear-gradient(#1A2130,#FF8309)' },
     { id: 'about', label: 'About', word: 'ABOUT', fx: .27, fs: .82, fy: '0px', state: 'curious', hl: '#1A2130', gc: '#1A2130', go: .16,
       sky: ['#FF9B38', '#FF8309'], sun: { c: '#FFFFFF', d: 58, x: .27, y: 54 }, hills: ['#E96F00', '#B85500', '#1A2130'], tb: 'linear-gradient(#FF9B38,#FF8309)' },
     { id: 'skills', label: 'Skills', word: 'SKILLS', fx: -.27, fs: .8, fy: '0px', state: 'focused', hl: '#FFFFFF', gc: '#FF8309', go: .3,
       sky: ['#10151F', '#1F2840'], sun: { c: '#FF8309', d: 44, x: -.27, y: 50 }, hills: ['#2C3751', '#232C42', '#1A2130'], tb: 'linear-gradient(#10151F,#2C3751)' },
-    { id: 'learning', label: 'Learning', word: 'JOURNEY', fx: .27, fs: .8, fy: '0px', state: 'thinking', hl: '#FFFFFF', gc: '#FFFFFF', go: .14,
-      sky: ['#1A2130', '#5A3320 62%', '#FF8309'], sun: { c: '#FF8309', d: 54, x: .27, y: 66 }, hills: ['#3A2A33', '#2A2430', '#161C2A'], tb: 'linear-gradient(#1A2130,#FF8309)' },
-    { id: 'projects', label: 'Projects', word: 'WORK', fx: -.3, fs: .74, fy: '0px', state: 'proud', hl: '#1A2130', gc: '#1A2130', go: .14,
-      sky: ['#FFFFFF', '#E6EAF3'], sun: { c: '#FF8309', d: 46, x: -.3, y: 50 }, hills: ['#CBD3E4', '#FF8309', '#1A2130'], tb: 'linear-gradient(#FFFFFF,#FF8309)' },
-    { id: 'languages', label: 'Languages', word: 'LANGUAGES', fx: 0, fs: .68, fy: '5svh', state: 'talk', hl: '#1A2130', gc: '#1A2130', go: .16,
+    { id: 'ai', label: 'AI', word: 'WORKFLOW', fx: .27, fs: .8, fy: '0px', state: 'build', hl: '#1A2130', gc: '#1A2130', go: .12,
+      sky: ['#FFFFFF', '#DDE3F0'], sun: { c: '#FF8309', d: 40, x: .27, y: 42 }, hills: ['#C3CADC', '#8E9AB8', '#1A2130'], tb: 'linear-gradient(#FFFFFF,#8E9AB8)' },
+    { id: 'learning', label: 'Learning', word: 'JOURNEY', fx: -.27, fs: .8, fy: '0px', state: 'thinking', hl: '#FFFFFF', gc: '#FFFFFF', go: .14,
+      sky: ['#1A2130', '#5A3320 62%', '#FF8309'], sun: { c: '#FF8309', d: 54, x: -.27, y: 66 }, hills: ['#3A2A33', '#2A2430', '#161C2A'], tb: 'linear-gradient(#1A2130,#FF8309)' },
+    { id: 'projects', label: 'Projects', word: 'WORK', fx: .3, fs: .74, fy: '0px', state: 'proud', hl: '#1A2130', gc: '#1A2130', go: .14,
+      sky: ['#FFFFFF', '#E6EAF3'], sun: { c: '#FF8309', d: 46, x: .3, y: 50 }, hills: ['#CBD3E4', '#FF8309', '#1A2130'], tb: 'linear-gradient(#FFFFFF,#FF8309)' },
+    { id: 'languages', label: 'Languages', word: 'LANGUAGES', fx: 0, fs: .68, fy: '2svh', state: 'talk', hl: '#1A2130', gc: '#1A2130', go: .16,
       sky: ['#FF8309', '#FFB873'], sun: { c: '#FFFFFF', d: 52, x: 0, y: 56 }, hills: ['#2C3751', '#212A3D', '#1A2130'], tb: 'linear-gradient(#FF8309,#FFFFFF)' },
     { id: 'contact', label: 'Contact', word: 'HELLO', fx: .27, fs: .82, fy: '0px', state: 'wave', hl: '#FFFFFF', gc: '#FFFFFF', go: .14,
       sky: ['#0C111C', '#1A2130'], sun: { c: '#FF8309', d: 78, x: .27, y: 64 }, hills: ['#26304A', '#1C2438', '#0F1420'], tb: 'linear-gradient(#0C111C,#FF8309)' }
@@ -76,14 +78,22 @@
     s.append(p); return s;
   }
   var world = $('#world');
+  var STAR_BG = (function () { // a fixed little constellation, drawn as dots (no extra elements)
+    var out = [], seed = 7;
+    function rnd() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
+    for (var i = 0; i < 46; i++) { var r = (rnd() < .2 ? 2 : 1.3).toFixed(1); out.push('radial-gradient(' + r + 'px ' + r + 'px at ' + (rnd() * 100).toFixed(1) + '% ' + (rnd() * 62).toFixed(1) + '%, #fff 60%, transparent 62%)'); }
+    return out.join(',');
+  })();
   SCENES.forEach(function (s, i) {
     var bg = h('div', { class: 'bg', 'data-id': s.id });
     bg.style.background = 'linear-gradient(180deg,' + s.sky.join(',') + ')';
+    var dusk = h('div', { class: 'dusk' }), stars = h('div', { class: 'stars' }), moon = h('div', { class: 'moon' }, h('i', { class: 'c1' }), h('i', { class: 'c2' }), h('i', { class: 'c3' }));
+    stars.style.backgroundImage = STAR_BG; moon.style.setProperty('--d', (s.sun.d * .55).toFixed(1) + 'vmax'); moon.style.setProperty('--sx', s.sun.x); moon.style.setProperty('--sy', s.sun.y + '%');
     var sun = h('div', { class: 'sun' });
     sun.style.setProperty('--d', s.sun.d + 'vmax'); sun.style.setProperty('--sx', s.sun.x); sun.style.setProperty('--sy', s.sun.y + '%');
     sun.style.background = 'radial-gradient(circle at 38% 34%, ' + s.sun.c + ' 0%, ' + s.sun.c + ' 55%, ' + s.sun.c + 'CC 100%)';
     sun.style.boxShadow = '0 0 120px 40px ' + s.sun.c + '55';
-    add(bg, sun, svgLayer(s.hills[0], i * 2.1 + 1, 270, 150, 66, 3), svgLayer(s.hills[1], i * 1.7 + 4, 300, 130, 48, 6), svgLayer(s.hills[2], i * 2.9 + 2, 330, 90, 30, 11));
+    add(bg, dusk, stars, sun, moon, svgLayer(s.hills[0], i * 2.1 + 1, 270, 150, 66, 3), svgLayer(s.hills[1], i * 1.7 + 4, 300, 130, 48, 6), svgLayer(s.hills[2], i * 2.9 + 2, 330, 90, 30, 11));
     world.append(bg);
   });
 
@@ -111,7 +121,39 @@
   if (P.resumeUrl) { resumeBtn.href = P.resumeUrl; resumeBtn.textContent = 'Open my resume'; resumeBtn.target = '_blank'; resumeBtn.rel = 'noopener'; resumeBtn.hidden = false; }
 
   var nowItems = C.learning.filter(function (l) { return l.status === 'now'; });
-  add($('#nowStrip'), h('span', { text: 'Currently learning' }), nowItems.map(function (l) { return h('span', { class: 'tag now-dot', text: l.title }); }));
+  var NW = C.now || {};
+  [['Building', NW.building], ['Learning', nowItems.map(function (l) { return l.title; }).join(', ')], ['Looking for', NW.looking]].forEach(function (r) {
+    if (r[1]) add($('#nowStrip'), h('div', { class: 'nrow' }, h('span', { text: r[0] }), h('span', { class: 'tag now-dot', text: r[1] })));
+  });
+
+  var editMode = /[?&]edit(=|&|$)/.test(location.search);
+  var proofEl = $('#proof');
+  if ((C.proof || []).length) add(proofEl, C.proof.map(function (x) { return h('div', { class: 'stat' }, h('b', { text: x.value }), h('span', { text: x.label })); })); else proofEl.remove();
+  function mediaEl(src) {
+    var yt = /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/.exec(src);
+    if (yt) return h('iframe', { src: 'https://www.youtube-nocookie.com/embed/' + yt[1], title: 'A hello from Nithish', allow: 'accelerometer; encrypted-media; picture-in-picture', allowfullscreen: true, loading: 'lazy' });
+    if (/\.(mp3|m4a|wav|ogg)(\?|$)/i.test(src)) return h('audio', { src: src, controls: true, preload: 'metadata' });
+    return h('video', { src: src, controls: true, playsinline: true, preload: 'metadata' });
+  }
+  (function () {
+    var H = C.hello || {}, box = $('#helloClip');
+    if (H.src) add(box, h('figure', { class: 'hello' }, mediaEl(H.src), h('figcaption', { text: H.caption || '' })));
+    else if (editMode) add(box, h('div', { class: 'slot', text: 'Your hello clip goes here. Paste a video, audio or YouTube link into hello.src in content.js.' }));
+    else box.remove();
+    var Q = C.testimonials || [], qb = $('#quotes');
+    if (Q.length) add(qb, h('h3', { class: 'sub' , text: 'What people say' }), h('div', { class: 'grid' }, Q.map(function (q) { return h('figure', { class: 'card quote' }, h('blockquote', { text: q.quote }), h('figcaption', {}, h('b', { text: q.name }), q.role ? h('span', { text: q.role }) : null)); })));
+    else if (editMode) add(qb, h('h3', { class: 'sub', text: 'What people say' }), h('div', { class: 'slot', text: 'Real quotes go here. Add them to testimonials in content.js.' }));
+    else qb.remove();
+  })();
+
+  /* ---- how I work with AI ---- */
+  (function () {
+    var W = C.aiWorkflow || {};
+    $('#aiLede').textContent = W.lede || '';
+    add($('#aiSteps'), (W.steps || []).map(function (st, i) { return h('li', {}, h('span', { class: 'n', 'aria-hidden': 'true', text: String(i + 1) }), h('b', { text: st.t }), h('span', { class: 'meta', text: st.d })); }));
+    add($('#aiTools'), (W.tools || []).map(function (t) { return h('span', { class: 'tag', text: t }); }));
+    var ex = W.example; if (ex) add($('#aiExample'), h('h3', { class: 'sub', text: ex.title }), h('div', { class: 'ba-row' }, h('div', { class: 'card' }, h('span', { class: 'k', text: 'Before' }), h('p', { text: ex.before })), h('span', { class: 'arr', 'aria-hidden': 'true', text: '\u2192' }), h('div', { class: 'card after' }, h('span', { class: 'k', text: 'After' }), h('p', { text: ex.after }))));
+  })();
 
   add($('#bio'), C.profile.bio.map(function (t) { return h('p', { text: t }); }));
   add($('#facts'), C.funFacts.map(function (f) { return h('span', { class: 'tag', text: f }); }));
@@ -145,21 +187,36 @@
     dlg.replaceChildren(
       h('div', { class: 'head' }, h('h2', { id: 'dlgT', text: p.title }), h('button', { class: 'btn ghost small', type: 'button', text: 'Close', onclick: function () { dlg.close ? dlg.close() : dlg.removeAttribute('open'); } })),
       h('p', { style: 'margin-bottom:16px', text: p.summary }),
-      h('dl', {}, row('Problem', p.problem), row('What I did', p.did), row('My role', p.role), row('Tools', p.tools.join(', ')), row('Result', p.outcome),
+      h('dl', {}, row('Problem', p.problem), row('What I did', p.did), row('My role', p.role), row('Tools', (p.tools || []).join(', ')), row('Result', p.outcome),
         h('div', {}, h('dt', { text: 'Link' }), h('dd', p.link ? {} : { class: 'todo' }, p.link ? h('a', { href: p.link, target: '_blank', rel: 'noopener', text: p.link }) : 'To add')))
     );
     if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
   }
   dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
   dlg.addEventListener('close', function () { if (lastFocus) lastFocus.focus(); });
+  function projCard(p) {
+    var card, front, back, flipBtn, backBtn;
+    function setFlip(on) {
+      card.classList.toggle('on', on); front.inert = on; back.inert = !on; front.setAttribute('aria-hidden', String(on)); back.setAttribute('aria-hidden', String(!on));
+      flipBtn.setAttribute('aria-expanded', String(on)); (on ? backBtn : flipBtn).focus({ preventScroll: true });
+    }
+    var caseBtn = function () { return h('button', { class: 'lnk', type: 'button', text: 'Case study', onclick: function () { openProject(p); } }); };
+    flipBtn = h('button', { class: 'lnk strong', type: 'button', 'aria-expanded': 'false', text: 'How I built it', onclick: function () { setFlip(true); } });
+    backBtn = h('button', { class: 'lnk strong', type: 'button', text: 'Back', onclick: function () { setFlip(false); } });
+    front = h('div', { class: 'face front' }, h('h3', { text: p.title }), h('p', { class: 'meta', text: p.summary }), h('div', { class: 'chips' }, p.category.map(function (c) { return h('span', { class: 'tag', text: c }); })), h('div', { class: 'acts' }, flipBtn, caseBtn()));
+    back = h('div', { class: 'face back', 'aria-hidden': 'true' }, h('h3', { text: 'How I built it' }),
+      p.how && p.how.length ? h('ol', { class: 'how' }, p.how.map(function (t) { return h('li', { text: t }); })) : h('p', { class: 'todo', text: 'To add' }),
+      p.tools && p.tools.length ? h('div', { class: 'chips' }, p.tools.map(function (t) { return h('span', { class: 'tag', text: t }); })) : null,
+      h('div', { class: 'acts' }, backBtn, caseBtn()));
+    back.inert = true;
+    card = h('div', { class: 'card project flip', 'data-id': p.id }, h('div', { class: 'flip-in' }, front, back));
+    return card;
+  }
   function renderProjects() {
-    projGrid.replaceChildren.apply(projGrid, C.projects.filter(function (p) { return projFilter === 'All' || p.category.indexOf(projFilter) > -1; }).map(function (p) {
-      return h('button', { class: 'card project', type: 'button', onclick: function () { openProject(p); } },
-        h('h3', { text: p.title }), h('p', { class: 'meta', text: p.summary }), h('div', { class: 'chips' }, p.category.map(function (c) { return h('span', { class: 'tag', text: c }); })), h('span', { class: 'more', text: 'Read the case study' }));
-    }));
+    projGrid.replaceChildren.apply(projGrid, C.projects.filter(function (p) { return projFilter === 'All' || p.category.indexOf(projFilter) > -1; }).map(projCard));
     $$('button', projBar).forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.g === projFilter)); });
   }
-  ['All', 'AI', 'Marketing', 'Startup'].forEach(function (g) { projBar.append(h('button', { type: 'button', 'data-g': g, text: g, onclick: function () { projFilter = g; renderProjects(); } })); });
+  ['All'].concat(C.projectFilters || ['AI', 'Marketing', 'Startup']).forEach(function (g) { projBar.append(h('button', { type: 'button', 'data-g': g, text: g, onclick: function () { projFilter = g; renderProjects(); } })); });
   renderProjects();
 
   add($('#langGrid'), C.languages.map(function (l) {
@@ -174,6 +231,7 @@
   }));
 
   var form = $('#form');
+  if (P.formEndpoint && $('#formNote')) { $('#formNote').textContent = P.formNote || 'Your name, email and message are emailed to me and used only to reply.'; $('#formNote').hidden = false; }
   function setErr(id, msg) { $('#f-' + id).classList.toggle('bad', !!msg); $('#e-' + id).textContent = msg || ''; }
   form.addEventListener('submit', function (e) {
     e.preventDefault();
@@ -184,16 +242,21 @@
     setErr('msg', t.length >= 10 ? '' : 'Write at least a short sentence.');
     if (!n || !okE || t.length < 10) return;
     var s = $('#status'); s.hidden = false;
-    s.textContent = 'Thanks, ' + n + '. This form is not connected to an inbox yet, so nothing was sent. Use one of the links below.';
+    if (!P.formEndpoint) { s.textContent = 'Thanks, ' + n + '. This form is not connected to an inbox yet, so nothing was sent. Use one of the links below.'; return; }
+    var btn = form.querySelector('button[type="submit"]'), body = { name: n, email: m, message: t };
+    if (P.formKey) body.access_key = P.formKey;
+    s.textContent = 'Sending…'; btn.disabled = true;
+    fetch(P.formEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { if (!r.ok) throw new Error('bad'); s.textContent = 'Thanks, ' + n + '. Your message is on its way.'; form.reset(); })
+      .catch(function () { s.textContent = 'Sorry, that did not send. Please use one of the links below.'; })
+      .then(function () { btn.disabled = false; });
   });
   ['name', 'email', 'msg'].forEach(function (id) { $('#' + id).addEventListener('input', function () { setErr(id, ''); }); });
 
   /* ---------- nav, dock ---------- */
-  var nav = $('#nav'), dots = $('#dots');
+  var nav = $('#nav');
   SCENES.forEach(function (s, i) {
     nav.append(h('a', { href: '#' + s.id, text: s.label }));
-    var a = h('a', { href: '#' + s.id, 'aria-label': s.label, title: s.label, text: String(i + 1).padStart(2, '0') });
-    a.style.setProperty('--tb', s.tb); dots.append(a);
   });
 
   /* ================= the face ================= */
@@ -205,10 +268,11 @@
     if (!c3 || !n3 || !window.Avatar3D || /[?&]face=svg/.test(location.search)) return;
     try {
       av = window.Avatar3D.create({ canvas: c3, maxDpr: 1.75, onNose: function (x, y, r) {
-        var s = Math.max(44, r * 2); n3.style.left = x + 'px'; n3.style.top = y + 'px'; n3.style.width = s + 'px'; n3.style.height = s + 'px'; n3.style.margin = (-s / 2) + 'px 0 0 ' + (-s / 2) + 'px';
+        var s = Math.max(44, r * 1.1); n3.style.left = x + 'px'; n3.style.top = y + 'px'; n3.style.width = s + 'px'; n3.style.height = s + 'px'; n3.style.margin = (-s / 2) + 'px 0 0 ' + (-s / 2) + 'px';
+        faceWrap.style.setProperty('--nx', x.toFixed(1)); faceWrap.style.setProperty('--ny', y.toFixed(1)); faceWrap.style.setProperty('--u', (r / .42).toFixed(1));
       } });
     } catch (e) { av = null; }
-    if (av) { faceWrap.classList.add('is3d'); n3.hidden = false; nose = n3; }
+    if (av) { faceWrap.classList.add('is3d'); n3.hidden = false; nose = n3; $$('.spot', faceWrap).forEach(function (b) { b.hidden = false; }); }
   })();
   var STATES = {
     idle:    { eye: 'open', mouth: 'smile', brow: 'idle', tilt: 0 },
@@ -222,7 +286,12 @@
     sneeze:  { eye: 'scrunch', mouth: 'open', brow: 'pinch', tilt: 0 },
     sleep:   { eye: 'closed', mouth: 'small', brow: 'idle', tilt: 7 },
     yawn:    { eye: 'closed', mouth: 'yawn', brow: 'raised', tilt: 0 },
-    startled:{ eye: 'open', mouth: 'yawn', brow: 'raised', tilt: -4 }
+    startled:{ eye: 'open', mouth: 'yawn', brow: 'raised', tilt: -4 },
+    sniff:   { eye: 'open', mouth: 'small', brow: 'curious', tilt: -3, nose: 'twitch' },
+    build:   { eye: 'open', mouth: 'grin', brow: 'focused', tilt: 4 },
+    interest:{ eye: 'open', mouth: 'small', brow: 'raised', tilt: -5 },
+    agree:   { eye: 'open', mouth: 'smile', brow: 'raised', tilt: 2 },
+    squinty: { eye: 'squint', mouth: 'small', brow: 'raised', tilt: 3 }
   };
   var lookX = 0, lookY = 0, fixedLook = null, busy = false, currentSec = 'home';
   function applyLook() { var v = fixedLook || [lookX, lookY]; if (av) av.look(v[0] / 7, v[1] / 4.5); pups.forEach(function (p) { p.style.transform = 'translate(' + v[0] + 'px,' + v[1] + 'px)'; }); }
@@ -309,7 +378,7 @@
   function tickle() {
     if (busy) return;
     busy = true; fixedLook = null; timers.forEach(clearTimeout); timers = []; bubbles.replaceChildren();
-    hintMode = 'tickle'; hint.classList.remove('bless'); sfxSneeze();
+    hintMode = 'tickle'; hint.classList.remove('bless'); hint.classList.add('show'); sfxSneeze();
     face.classList.add('used'); faceWrap.classList.add('used'); setFace('tickled');
     var t0 = performance.now(), D = reduce ? 200 : 800;
     (function tick(now) {
@@ -334,7 +403,7 @@
     later(function () { busy = false; setFace(scene(currentSec).state); offerBless(); }, 1700);
   }
   hint.addEventListener('click', function () { if (hintMode === 'bless') bless(); else tickle(); });
-  $('#again').addEventListener('click', tickle);
+  var againBtn = $('#again'); if (againBtn) againBtn.addEventListener('click', tickle);
   nose.addEventListener('click', tickle);
   nose.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tickle(); } });
   nose.addEventListener('pointerenter', function () {
@@ -354,7 +423,7 @@
     words.forEach(function (w, i) { w.classList.toggle('on', i === idx); });
     place(id);
     $('#cn').textContent = String(idx + 1).padStart(2, '0'); $('#cl').textContent = s.label;
-    $$('a', dots).concat($$('a', nav)).forEach(function (a) { a.setAttribute('aria-current', String(a.getAttribute('href') === '#' + id)); });
+    $$('a', nav).forEach(function (a) { a.setAttribute('aria-current', String(a.getAttribute('href') === '#' + id)); });
     if (!busy) setFace(s.state);
   }
   var io = new IntersectionObserver(function (entries) {
@@ -387,6 +456,7 @@
   }
   function sfxSneeze() {
     if (!soundOn) return;
+    if (playVoice(voicePick('sneeze'), null, null)) return;
     var c = actx(); if (!c) return;
     var t = c.currentTime, lead = reduce ? .2 : .8, out = c.createGain(); out.gain.value = .7; out.connect(c.destination);
     if (!reduce) { // the "ahh" breath in, rising while the nose twitches
@@ -413,21 +483,23 @@
   /* ---- sneeze counter, achievements, bless you ---- */
   var total = parseInt(store('nit-sneezes') || '0', 10) || 0, toastT = 0;
   $('#sneezeN').textContent = total;
+  if (total > 0) $('#sneezeChip').classList.add('seen');
   var ACH = { 1: 'First tickle. Bless you!', 5: 'Achievement: Allergy season (5 sneezes)', 10: 'Achievement: Dust magnet (10 sneezes)', 25: 'Achievement: Hay fever (25 sneezes). Okay, that is enough!' };
   function toast(msg) { var t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(function () { t.classList.remove('on'); }, 4200); }
   function counted() {
     total++; store('nit-sneezes', String(total)); $('#sneezeN').textContent = total;
-    var chip = $('#sneezeChip'); chip.classList.remove('bump'); void chip.offsetWidth; chip.classList.add('bump');
+    var chip = $('#sneezeChip'); chip.classList.add('seen'); chip.classList.remove('bump'); void chip.offsetWidth; chip.classList.add('bump');
     if (ACH[total]) { var msg = ACH[total]; setTimeout(function () { toast(msg); }, Date.now() - lastSecretAt < 3000 ? 3400 : 0); }
   }
   function offerBless() {
     hintMode = 'bless'; hint.classList.add('bless'); setHint('Say bless you', 0);
-    later(function () { if (hintMode === 'bless') { hintMode = 'tickle'; hint.classList.remove('bless'); setHint('Tickle again', 0); } }, 9000);
+    later(function () { if (hintMode === 'bless') { hintMode = 'tickle'; hint.classList.remove('bless', 'show'); setHint('Tickle again', 0); } }, 9000);
   }
   var THANKS = [{ t: 'Thanks!', c: 'en' }, { t: 'நன்றி!', c: 'ta' }, { t: 'धन्यवाद!', c: 'hi' }, { t: 'धन्यवाद!', c: 'ne' }];
   function bless() {
-    hintMode = 'tickle'; hint.classList.remove('bless'); setHint('Tickle again', 0);
+    hintMode = 'tickle'; hint.classList.remove('bless', 'show'); setHint('Tickle again', 0);
     var th = THANKS[Math.floor(Math.random() * THANKS.length)];
+    if (soundOn) playVoice(voiceFor('bless', th.c), null, null);
     Array.prototype.forEach.call(bubbles.children, function (b) { b.classList.remove('on'); b.classList.add('off'); });
     later(function () {
       bubbles.replaceChildren(); popBubble(th.t, th.c, 2400); unlock('bless');
@@ -438,18 +510,37 @@
 
   /* ---- hear the greeting aloud (uses the voices on the visitor's device) ---- */
   function flashBtn(btn, t) { var o = btn.dataset.o || btn.textContent; btn.dataset.o = o; btn.textContent = t; clearTimeout(btn._t); btn._t = setTimeout(function () { btn.textContent = o; }, 2400); }
-  function speak(l, btn) {
+  /* ---- his own recorded voice, when a clip is set in content.js (voice); otherwise the device voice or built-in sound ---- */
+  var vox = null, V = C.voice || {};
+  function voiceFor(kind, code) { return V[kind] && V[kind][code] ? V[kind][code] : ''; }
+  function voicePick(kind) { var o = V[kind] || {}, ks = Object.keys(o).filter(function (k) { return o[k]; }); return ks.length ? o[ks[Math.floor(Math.random() * ks.length)]] : ''; }
+  function playVoice(url, btn, fallback) {
+    if (!url) return false;
+    try {
+      if (vox) vox.pause();
+      vox = new Audio(url); vox.addEventListener('error', function () { if (fallback) fallback(); });
+      var p = vox.play(); if (p && p.catch) p.catch(function () { if (fallback) fallback(); });
+      if (btn) flashBtn(btn, 'Playing…');
+      return true;
+    } catch (e) { return false; }
+  }
+  function sayText(code, text, btn, name, voiceUrl) {
+    if (voiceUrl && playVoice(voiceUrl, btn, function () { sayText(code, text, btn, name); })) return;
     var ss = window.speechSynthesis;
     if (!ss || !window.SpeechSynthesisUtterance) { flashBtn(btn, 'Not supported here'); return; }
     var tags = { en: 'en-IN', ta: 'ta-IN', hi: 'hi-IN', ne: 'ne-NP' }, voices = ss.getVoices();
-    var want = (tags[l.code] || l.code).toLowerCase(), base = want.split('-')[0], note = '';
+    var want = (tags[code] || code).toLowerCase(), base = want.split('-')[0], note = '';
     var v = voices.filter(function (x) { return x.lang.toLowerCase().replace('_', '-') === want; })[0] || voices.filter(function (x) { return x.lang.toLowerCase().indexOf(base) === 0; })[0];
-    if (!v && l.code === 'ne') { v = voices.filter(function (x) { return x.lang.toLowerCase().indexOf('hi') === 0; })[0]; if (v) note = 'Using a Hindi voice'; }
-    if (!v && voices.length) { flashBtn(btn, 'No ' + l.name + ' voice on this device'); return; }
+    if (!v && code === 'ne') { v = voices.filter(function (x) { return x.lang.toLowerCase().indexOf('hi') === 0; })[0]; if (v) note = 'Using a Hindi voice'; }
+    if (!v && voices.length) { flashBtn(btn, 'No ' + (name || code) + ' voice on this device'); return; }
     ss.cancel();
-    var u = new SpeechSynthesisUtterance(l.greeting + '. ' + l.sample); u.lang = v ? v.lang : want; if (v) u.voice = v;
+    var u = new SpeechSynthesisUtterance(text); u.lang = v ? v.lang : want; if (v) u.voice = v;
     ss.speak(u); flashBtn(btn, note || 'Playing…');
   }
+  function speak(l, btn) { sayText(l.code, l.greeting + '. ' + l.sample, btn, l.name, voiceFor('languages', l.code)); }
+
+  var hearBtn = $('#hearHello');
+  if (hearBtn && V.hello) { hearBtn.hidden = false; hearBtn.addEventListener('click', function () { playVoice(V.hello, hearBtn, function () { flashBtn(hearBtn, 'Could not play'); }); }); }
 
   /* ---- command menu and "ask me" (prepared answers from content.js) ---- */
   var pal = $('#palette'), palIn = $('#palIn'), palList = $('#palList'), palAns = $('#palAns'), askBtn = $('#askBtn'), active = 0, rows = [];
@@ -463,7 +554,8 @@
     { k: ['hire', 'hiring', 'open to', 'available', 'availability', 'job', 'opportunit', 'remote', 'position', 'vacan', 'recruit'], f: function () { return { p: [P.availability + '. I am looking for an AI-first, remote role where I can build with people who care about doing things well.', 'The quickest way to reach me is the Contact section.'], go: 'contact' }; } },
     { k: ['strong', 'good at', 'best at', 'skill', 'strength', 'expert', 'tools', 'what can you do', 'know'], f: function () { return { p: ['Strongest: ' + list(strongNames()) + '.', 'Solid: ' + list(midNames()) + '.'].concat(begNames().length ? ['Still early: ' + list(begNames()) + '. I say so plainly.'] : []), go: 'skills' }; } },
     { k: ['roundu', 'startup', 'company', 'your role', 'what do you do', 'human resources'], f: function () { var e = C.experience[0]; return { p: [e.role + ' at ' + e.org + '. ' + e.summary], go: 'about' }; } },
-    { k: ['language', 'speak', 'tamil', 'hindi', 'nepali', 'english', 'sneeze in'], f: function () { return { p: ['I speak ' + list(C.languages.map(function (l) { return l.name; })) + '. Tickle my nose and I will sneeze in all of them.'], go: 'languages' }; } },
+    { k: ['workflow', 'use ai', 'with ai', 'ai tools', 'process', 'how do you build', 'prompt'], f: function () { var W = C.aiWorkflow || {}; return { p: [W.lede].concat((W.steps || []).map(function (x, i) { return (i + 1) + '. ' + x.t + ': ' + x.d; })).filter(Boolean), go: 'ai' }; } },
+    { k: ['language', 'speak', 'tamil', 'hindi', 'nepali', 'english', 'sneeze in'], f: function () { return { p: ['I speak ' + list(C.languages.map(function (l) { return l.name; })) + '. Ask me nicely and I might sneeze in all of them.'], go: 'languages' }; } },
     { k: ['learn', 'next', 'studying', 'journey', 'growing'], f: function () { var now = C.learning.filter(function (l) { return l.status === 'now'; }).map(function (l) { return l.title; }), nx = C.learning.filter(function (l) { return l.status === 'next'; }).map(function (l) { return l.title; }); return { p: [now.length ? 'Right now: ' + list(now) + '.' : '', nx.length ? 'Next: ' + list(nx) + '.' : ''].filter(Boolean), go: 'learning' }; } },
     { k: ['project', 'built', 'build', 'made', 'portfolio', 'rag', 'agent', 'case study', 'work you'], f: function () { return { p: C.projects.map(function (p) { return p.title + ': ' + p.summary; }), go: 'projects' }; } },
     { k: ['contact', 'email', 'reach', 'linkedin', 'github', 'resume', 'cv', 'instagram', 'touch'], f: function () { var have = C.links.filter(function (l) { return l.url; }).map(function (l) { return l.label + (l.value ? ' (' + l.value + ')' : ''); }); return { p: [have.length ? 'You can find me on ' + list(have) + '.' : 'My contact links are still being added.', 'The Contact section has a form and all my links, and you can save my CV as a PDF there.'], go: 'contact' }; } },
@@ -486,8 +578,10 @@
   }
   function commands() {
     var out = SCENES.map(function (s, i) { return { label: 'Go to ' + s.label, tag: String(i + 1).padStart(2, '0'), run: function () { go(s.id); } }; });
-    out.push({ label: 'Tickle my nose', tag: 'Fun', run: function () { pal.close(); setTimeout(tickle, 250); } });
     out.push({ label: 'Save my CV as PDF', tag: 'CV', run: function () { pal.close(); setTimeout(printCV, 250); } });
+    if (V.hello) out.push({ label: 'Hear my hello', tag: 'Voice', run: function () { pal.close(); setTimeout(function () { playVoice(V.hello, null, null); }, 250); } });
+    out.push({ label: 'Give me a hint', tag: 'Secrets', run: function () { pal.close(); setTimeout(giveHint, 250); } });
+    out.push({ label: 'Language quiz', tag: 'Fun', run: function () { pal.close(); setTimeout(quizStart, 250); } });
     out.push({ label: 'Throw confetti', tag: 'Fun', run: function () { pal.close(); setTimeout(party, 250); } });
     out.push({ label: soundOn ? 'Turn sound off' : 'Turn sound on', tag: 'Fun', run: function () { pal.close(); setSound(!soundOn); } });
     C.links.forEach(function (l) {
@@ -541,7 +635,7 @@
     var i = active; do { i += d; } while (rows[i] && rows[i].group);
     if (rows[i]) setActive(i);
   }
-  function openPal() { if (pal.open) return; $('#palSec').textContent = 'Secrets found: ' + foundList().length + ' of ' + SEC_N + '. Some of them are typed, not clicked.'; pal.showModal(); palIn.value = ''; render(''); palIn.focus(); }
+  function openPal() { if (pal.open) return; $('#palSec').textContent = 'Secrets found: ' + foundList().length + ' of ' + SEC_N + '. Some are typed, some are clicked. Stuck? Choose \u201cGive me a hint\u201d.'; pal.showModal(); palIn.value = ''; render(''); palIn.focus(); }
   askBtn.addEventListener('click', openPal);
   $('#palX').addEventListener('click', function () { pal.close(); });
   pal.addEventListener('click', function (e) { if (e.target === pal) pal.close(); });
@@ -556,9 +650,14 @@
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); if (pal.open) pal.close(); else openPal(); return; }
     if (typing || pal.open || dlg.open || e.ctrlKey || e.metaKey || e.altKey || e.key.length !== 1) return;
     if (e.key === '/') { e.preventDefault(); openPal(); return; }
-    typed = (typed + e.key.toLowerCase()).slice(-6);
-    if (typed.slice(-5) === 'achoo') { typed = ''; unlock('achoo'); tickle(); }
-    else if (typed === 'roundu') { typed = ''; unlock('roundu'); popBubble('RoundU!', 'en', 2000); }
+    typed = (typed + e.key.toLowerCase()).slice(-8);
+    function ends(w) { return typed.slice(-w.length) === w; }
+    if (ends('achoo')) { typed = ''; unlock('achoo'); tickle(); }
+    else if (ends('roundu')) { typed = ''; unlock('roundu'); popBubble('RoundU!', 'en', 2000); }
+    else if (ends('specs')) { typed = ''; cleanSpecs(); }
+    else if (ends('boing')) { typed = ''; boing(); }
+    else if (ends('wear')) { typed = ''; wear(); }
+    else if (ends('moon')) { typed = ''; sunBtn.click(); }
   });
 
   /* ---- reveal on scroll, clock ---- */
@@ -568,16 +667,37 @@
     var rio = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); rio.unobserve(e.target); if (e.target.classList.contains('head')) scramble(e.target.querySelector('h2')); } }); }, { rootMargin: '0px 0px -12% 0px' });
     rv.forEach(function (el) { rio.observe(el); });
   }
-  function tickClock() {
-    var t = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date());
-    $('#clockT').textContent = P.availability + ' · Vellore ' + t;
+  var TZ = P.timezone || 'Asia/Kolkata', CITY = P.location || 'Coimbatore', todMan = null;
+  function cityTime() {
+    var f = new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: '2-digit', minute: '2-digit', hour12: false }).formatToParts(new Date()), o = {};
+    f.forEach(function (x) { o[x.type] = x.value; });
+    return { hh: o.hour === '24' ? '00' : o.hour, mm: o.minute, dec: (+o.hour % 24) + (+o.minute) / 60 };
   }
+  function clockNight() { var d = cityTime().dec; return d < 6 || d >= 18.5; }   // sun up about 06:00 to 18:30
+  function applyTod() { document.body.classList.toggle('night', todMan ? todMan === 'night' : clockNight()); placeSun(currentSec); }
+  function tickClock() {
+    var t = cityTime(); $('#clockT').textContent = P.availability + ' · ' + CITY + ' ' + t.hh + ':' + t.mm;
+    if (!todMan) applyTod();
+  }
+  var sunBtn = $('#sunBtn');
+  function placeSun(id) {
+    var sc = scene(id); if (!sc) return;
+    var s2 = sc.sun, vw = window.innerWidth, vh = window.innerHeight, mob = vw < 900, night = document.body.classList.contains('night'), orange = document.body.classList.contains('orange');
+    var size = s2.d * Math.max(vw, vh) / 100 * (night && !orange ? .55 : 1), x = mob ? vw / 2 : vw / 2 + s2.x * vw, y = mob ? vh * .3 : vh * s2.y / 100;
+    sunBtn.style.left = (x - size / 2) + 'px'; sunBtn.style.top = (y - size / 2) + 'px'; sunBtn.style.width = size + 'px'; sunBtn.style.height = size + 'px';
+  }
+  window.addEventListener('resize', function () { placeSun(currentSec); });
+  sunBtn.addEventListener('click', function () {
+    var night = document.body.classList.contains('night'); todMan = night ? 'day' : 'night'; applyTod();
+    var first = unlock('sundial'); if (!first) toast(night ? 'Good morning, Coimbatore' : 'Good night, Coimbatore');
+    reactFor(night ? 'startled' : 'yawn', 1500);
+  });
   tickClock(); setInterval(tickClock, 30000);
-
+  $('#cm').textContent = String(SCENES.length).padStart(2, '0');
 
   /* ================= showpiece ================= */
   /* ---- secrets (small rewards for curious visitors) ---- */
-  var SECRETS = { achoo: 'Magic word', bless: 'Polite visitor', nap: 'Power nap', roundu: 'RoundU fan', konami: 'Old-school code', spark: 'Logo poke' };
+  var SECRETS = { achoo: 'Magic word', bless: 'Polite visitor', nap: 'Power nap', roundu: 'RoundU fan', konami: 'Old-school code', spark: 'Logo poke', specs: 'Squeaky clean', boing: 'Boing', wardrobe: 'Fresh fit', sundial: 'Sun dial', orange: 'RoundU mode', polyglot: 'Polyglot' };
   var SEC_N = Object.keys(SECRETS).length;
   var lastSecretAt = 0;
   function foundList() { try { return JSON.parse(store('nit-secrets') || '[]') || []; } catch (e) { return []; } }
@@ -585,8 +705,30 @@
     var f = foundList(); if (f.indexOf(id) > -1) return false;
     f.push(id); store('nit-secrets', JSON.stringify(f)); lastSecretAt = Date.now();
     toast('Secret found: ' + SECRETS[id] + ' (' + f.length + ' of ' + SEC_N + ')');
+    updateSecChip(true);
     return true;
   }
+  var secChip = $('#secChip');
+  function updateSecChip(bump) {
+    var n = foundList().length; $('#secN').textContent = n + '/' + SEC_N;
+    if (n > 0) secChip.classList.add('seen');
+    if (bump) { secChip.classList.remove('bump'); void secChip.offsetWidth; secChip.classList.add('bump'); }
+  }
+  updateSecChip(false);
+  /* hints: riddles in content.js, given one at a time, easiest first */
+  function nextHint() {
+    var found = foundList(), list = (C.secretHints || []).filter(function (x) { return found.indexOf(x.id) < 0; });
+    if (!list.length) return 'You have found all ' + SEC_N + ' secrets. Nothing left to hide.';
+    return 'Hint (' + (SEC_N - list.length + 1) + ' of ' + SEC_N + '): ' + list[0].clue;
+  }
+  function giveHint() { toast(nextHint()); }
+  secChip.addEventListener('click', openPal);
+  /* a single gentle nudge per visit if nothing has been found after a while */
+  setTimeout(function () {
+    if (foundList().length === 0 && !store('nit-nudged') && !pal.open && !dlg.open && !document.hidden && !document.getElementById('intro')) {
+      store('nit-nudged', '1'); toast('Psst: this page hides ' + SEC_N + ' secrets. Open \u201cAsk me\u201d for a hint.');
+    }
+  }, 60000);
 
   /* ---- a speech bubble beside his head ---- */
   function popBubble(text, code, ms) {
@@ -710,7 +852,7 @@
     var mag = null, tiltEl = null;
     document.addEventListener('pointermove', function (e) {
       var t = e.target, ok = t && t.closest;
-      var m = ok ? t.closest('.btn, .pill-cta, .tool, .dots a') : null;
+      var m = ok ? t.closest('.btn, .pill-cta, .tool') : null;
       if (mag && mag !== m) { mag.style.translate = ''; mag = null; }
       if (m) { var r = m.getBoundingClientRect(); m.style.translate = ((e.clientX - (r.left + r.width / 2)) * .22).toFixed(1) + 'px ' + ((e.clientY - (r.top + r.height / 2)) * .3).toFixed(1) + 'px'; mag = m; }
       var c = ok && !t.closest('dialog') ? t.closest('.card') : null;
@@ -744,6 +886,7 @@
   }
   function party() {
     confetti(); if (!busy) { setFace('proud'); setTimeout(function () { if (!busy) setFace(scene(currentSec).state); }, 2600); }
+    if (av) av.act('spin'); else if (!reduce) { face.classList.remove('spin'); void face.getBoundingClientRect(); face.classList.add('spin'); setTimeout(function () { face.classList.remove('spin'); }, 1400); }
     if (!unlock('konami')) toast('Party time!');
   }
   var KONAMI = 'arrowup,arrowup,arrowdown,arrowdown,arrowleft,arrowright,arrowleft,arrowright,b,a', kbuf = [];
@@ -802,6 +945,122 @@
     var timer = setTimeout(end, 2400);
     intro.addEventListener('click', end); document.addEventListener('keydown', skipKey);
   }
+
+  /* ---- face easter eggs: click the glasses, the hair, or the tee ---- */
+  function reactFor(name, ms) {
+    if (busy || asleep) return;
+    setFace(name); setTimeout(function () { if (!busy && !asleep && !hov) setFace(scene(currentSec).state); }, ms || 1400);
+  }
+  var cleaningTill = 0;
+  function cleanSpecs() {                       // he takes a cloth and wipes each lens (about 3.8 seconds in the 3D face), then they sparkle
+    if (busy || Date.now() < cleaningTill) return; cleaningTill = Date.now() + 3900; if (av) av.act('clean');
+    reactFor('squinty', 3500); setTimeout(function () { popBubble('Squeaky clean!', 'en', 1800); }, 3150); unlock('specs');
+  }
+  function boing() {
+    if (busy) return; if (av) av.act('bounce');
+    reactFor('proud', 1300); popBubble('Boing!', 'en', 1500); unlock('boing');
+  }
+  var OUTFIT_NAMES = ['White tee', 'RoundU tee', 'Navy hoodie', 'RoundU cap'], outfitIdx = parseInt(store('nit-outfit') || '0', 10) || 0;
+  if (av && outfitIdx) av.outfit(outfitIdx);
+  function wear() {
+    if (!av) { toast('The wardrobe needs the 3D face, which this device is not showing.'); return; }
+    outfitIdx = av.outfit(outfitIdx + 1); store('nit-outfit', String(outfitIdx));
+    reactFor('proud', 1300); if (!unlock('wardrobe')) toast(OUTFIT_NAMES[outfitIdx]);
+  }
+  $('#spotGlasses').addEventListener('click', cleanSpecs); $('#spotGlasses2').addEventListener('click', cleanSpecs);
+  $('#spotHair').addEventListener('click', boing);
+  $('#spotChest').addEventListener('click', wear);
+  /* resting the mouse on a hidden spot makes him curious: a tiny nudge that something is there */
+  if (fine && !reduce) $$('.spot', faceWrap).forEach(function (b) {
+    b.addEventListener('pointerenter', function () { if (!busy && !asleep && !drowsy && !hov) setFace('curious'); });
+    b.addEventListener('pointerleave', function () { if (!busy && !asleep && !hov) setFace(scene(currentSec).state); });
+  });
+
+  /* ---- he reacts to what you hover (mouse only) ---- */
+  var hov = null;
+  function lookToward(el) {
+    var r = el.getBoundingClientRect(), fr = face.getBoundingClientRect();
+    var dx = r.left + r.width / 2 - (fr.left + fr.width / 2), dy = r.top + r.height / 2 - (fr.top + fr.height * .38), d = Math.hypot(dx, dy) || 1;
+    fixedLook = [dx / d * 7, dy / d * 4.5]; applyLook();
+  }
+  function hoverOn(c) {
+    if (busy || asleep || drowsy) return;
+    if (c.classList.contains('project')) { setFace('interest'); if (av) av.lean(1); lookToward(c); }
+    else if (c.classList.contains('skill')) { setFace('agree'); if (av) av.act('nod'); lookToward(c); }
+    else if (c.classList.contains('lang')) { setFace('talk'); lookToward(c); }
+  }
+  function hoverOff() { if (av) av.lean(0); if (!busy && !asleep) setFace(scene(currentSec).state); }
+  if (fine && !reduce) {
+    document.addEventListener('pointerover', function (e) {
+      var c = e.target.closest ? e.target.closest('.card.project, .card.skill, .card.lang') : null;
+      if (c === hov) return;
+      if (hov) hoverOff();
+      hov = c; if (c) hoverOn(c);
+    });
+    document.addEventListener('pointerleave', function () { if (hov) { hov = null; hoverOff(); } });
+  }
+
+  /* ---- triple-click the logo for RoundU mode (all orange) ---- */
+  $('.brand').addEventListener('click', function (e) {
+    if (e.detail !== 3) return; e.preventDefault();
+    var on = document.body.classList.toggle('orange'); placeSun(currentSec);
+    if (!unlock('orange')) toast(on ? 'RoundU mode on' : 'RoundU mode off');
+  });
+
+  /* ---- the language quiz ---- */
+  var quizDlg = $('#quiz'), qz = null, qLast = null, QL = [['ta', 'Tamil'], ['hi', 'Hindi'], ['ne', 'Nepali']];
+  function quizClose() { if (quizDlg.close) quizDlg.close(); else quizDlg.removeAttribute('open'); }
+  function quizStart() {
+    var words = (C.quiz && C.quiz.words) || [];
+    if (words.length < 5) { toast('The quiz needs at least 5 words in content.js'); return; }
+    qz = { i: 0, score: 0, q: shuffle(words).slice(0, 5).map(function (w) {
+      var L = QL[Math.floor(Math.random() * QL.length)];
+      var pool = shuffle(words.filter(function (x) { return x !== w && x[L[0]] !== w[L[0]]; })).slice(0, 3);
+      return { w: w, code: L[0], lang: L[1], opts: shuffle([w].concat(pool)) };
+    }) };
+    quizDraw(); if (!quizDlg.open) { qLast = document.activeElement; if (quizDlg.showModal) quizDlg.showModal(); else quizDlg.setAttribute('open', ''); }
+  }
+  function quizHead() { return h('div', { class: 'head' }, h('h2', { id: 'quizT', text: 'Language quiz' }), h('button', { class: 'btn ghost small', type: 'button', text: 'Close', onclick: quizClose })); }
+  function quizDraw() {
+    if (qz.i >= qz.q.length) { quizResult(); return; }
+    var q = qz.q[qz.i], fb = h('div', { class: 'qfb', role: 'status', 'aria-live': 'polite' }), next = h('button', { class: 'btn', type: 'button', hidden: true, text: qz.i === qz.q.length - 1 ? 'See my score' : 'Next question', onclick: function () { qz.i++; quizDraw(); } });
+    var btns = q.opts.map(function (o) {
+      return h('button', { class: 'opt', type: 'button', lang: q.code, text: o[q.code], onclick: function () {
+        btns.forEach(function (b) { b.disabled = true; });
+        var good = o === q.w; if (good) qz.score++;
+        this.classList.add(good ? 'ok' : 'no'); btns.forEach(function (b, i) { if (q.opts[i] === q.w) b.classList.add('ok'); });
+        var same = (q.code === 'hi' || q.code === 'ne') && q.w.hi === q.w.ne;
+        fb.replaceChildren(h('b', { text: good ? 'Correct!' : 'Not quite. It is ' + q.w[q.code] + '.' }), h('button', { class: 'lnk', type: 'button', text: 'Hear it', onclick: function () { sayText(q.code, q.w[q.code], this, q.lang, q.w.voice && q.w.voice[q.code]); } }), same ? h('span', { class: 'meta', text: 'Hindi and Nepali use the same word here.' }) : null);
+        next.hidden = false; next.focus();
+        reactFor(good ? 'proud' : 'curious', 1300); if (good && av) av.act('nod');
+      } });
+    });
+    quizDlg.replaceChildren(quizHead(), h('p', { class: 'qmeta', text: 'Question ' + (qz.i + 1) + ' of ' + qz.q.length + ' · ' + qz.score + ' right so far' }),
+      h('p', { class: 'qq' }, 'How do you say \u201c' + q.w.en + '\u201d in ' + q.lang + '?'), h('div', { class: 'opts' }, btns), fb, h('div', { class: 'row' }, next));
+  }
+  function quizResult() {
+    var n = qz.score, tot = qz.q.length, msg = n === tot ? 'Perfect. You could introduce yourself anywhere.' : n >= 3 ? 'Nice. A few more words and you are fluent.' : 'A good start. Try again and the words will stick.';
+    quizDlg.replaceChildren(quizHead(), h('p', { class: 'qq big', text: 'You got ' + n + ' of ' + tot + '.' }), h('p', { class: 'meta', text: msg }),
+      h('div', { class: 'row' }, h('button', { class: 'btn', type: 'button', text: 'Play again', onclick: quizStart }), h('button', { class: 'btn ghost', type: 'button', text: 'Close', onclick: quizClose })));
+    if (n === tot) { confetti(); unlock('polyglot'); reactFor('proud', 2200); }
+  }
+  quizDlg.addEventListener('click', function (e) { if (e.target === quizDlg) quizClose(); });
+  quizDlg.addEventListener('close', function () { if (qLast) qLast.focus(); });
+  $('#quizBtn').addEventListener('click', quizStart);
+
+  // a tiny clue for the curious: now and then he sniffles, until the first sneeze has happened
+  (function () {
+    var n = 0;
+    function sniffle() {
+      if (count > 0 || n >= 5) return;
+      if (!busy && !document.hidden && !document.body.classList.contains('asleep') && !document.getElementById('intro')) {
+        n++; setFace('sniff');
+        setTimeout(function () { if (!busy) setFace(scene(currentSec).state); }, 650);
+      }
+      setTimeout(sniffle, 16000 + Math.random() * 6000);
+    }
+    if (!reduce) setTimeout(sniffle, 14000);
+  })();
 
   setFace('idle'); setSection('home'); startIntro();
 })();

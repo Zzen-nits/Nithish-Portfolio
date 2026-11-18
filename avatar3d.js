@@ -176,7 +176,7 @@ precision highp float; precision highp sampler2DShadow;
 in vec3 vW; in vec3 vN; in vec3 vC; in vec4 vL;
 uniform vec3 uEye, uColor, uEmis, uKeyDir, uKeyCol, uFillDir, uFillCol, uRimDir, uRimCol, uSky, uGround;
 uniform float uAlpha, uSpec, uShin, uRim, uFres, uSss, uUnlit, uSoft, uRecv, uVcol, uClipOn, uExposure, uShadowSize;
-uniform vec4 uClip; uniform sampler2DShadow uShadow;
+uniform vec4 uClip; uniform sampler2DShadow uShadow; uniform sampler2D uTex; uniform float uTexOn;
 out vec4 o;
 float shadowAt(float ndl){
   vec3 p = vL.xyz / vL.w * .5 + .5;
@@ -190,9 +190,12 @@ void main(){
   if (uClipOn > .5 && dot(vec4(vW, 1.), uClip) < 0.) discard;
   vec3 N = normalize(vN), V = normalize(uEye - vW);
   vec3 alb = uColor * mix(vec3(1.), vC, uVcol);
+  float tA = 1.;
+  if (uTexOn > .5) { vec4 tx = texture(uTex, vC.xy); tA = tx.a; alb = pow(tx.rgb / max(tx.a, .001), vec3(2.2)); }   // premultiplied sRGB decal (the RoundU logo)
   float nv = max(dot(N, V), 0.);
-  float alpha = uAlpha; if (uSoft > 0.) alpha *= pow(nv, uSoft);
+  float alpha = uAlpha * tA; if (uSoft > 0.) alpha *= pow(nv, uSoft);
   vec3 col;
+  if (uUnlit > 1.5) { o = vec4(pow(alb + uEmis, vec3(1. / 2.2)) * alpha, alpha); return; }   // flat print: brand colours exactly as drawn
   if (uUnlit > .5) { col = alb + uEmis; }
   else {
     float ndl = dot(N, uKeyDir);
@@ -236,7 +239,7 @@ function compile(gl, vs, fs) {
 
 /* ---------- materials and nodes ---------- */
 function mat(o) {
-  return Object.assign({ color: [1, 1, 1], emis: [0, 0, 0], alpha: 1, spec: 0, shin: 30, rim: 0, fres: 0, sss: 0, unlit: 0, soft: 0, recv: 1, cast: 1, vcol: 0, clip: 0 }, o);
+  return Object.assign({ color: [1, 1, 1], emis: [0, 0, 0], alpha: 1, spec: 0, shin: 30, rim: 0, fres: 0, sss: 0, unlit: 0, soft: 0, recv: 1, cast: 1, vcol: 0, clip: 0, tex: 0 }, o);
 }
 class Node {
   constructor(mesh, m) { this.mesh = mesh || null; this.m = m || null; this.p = [0, 0, 0]; this.r = [0, 0, 0]; this.s = [1, 1, 1]; this.kids = []; this.vis = true; this.world = M4.ident(); }
@@ -266,6 +269,28 @@ function create(opts) {
   if (!gl) return null;
   let P, DP;
   try { P = compile(gl, VS, FS); DP = compile(gl, DVS, DFS); } catch (e) { if (global.console) console.warn('Avatar3D: ' + e.message); return null; }
+
+  /* ----- the RoundU logo, as a small decal texture (unit 1) ----- */
+  const LOGO_SRC = 'data:image/png;base64,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';
+  const logoTex = gl.createTexture(); let logoReady = false;
+  gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, logoTex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 0, 0]));
+  gl.activeTexture(gl.TEXTURE0);
+  gl.useProgram(P.p); gl.uniform1i(P.u.uTex, 1);
+  if (typeof Image !== 'undefined') {
+    const img = new Image();
+    img.onload = () => {
+      gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, logoTex);
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+      gl.generateMipmap(gl.TEXTURE_2D);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.activeTexture(gl.TEXTURE0); logoReady = true; if (typeof wantEmblem !== 'undefined' && wantEmblem) emblem.vis = true;
+    };
+    img.src = LOGO_SRC;
+  }
 
   /* ----- shadow map ----- */
   const SS = opts.shadowSize || 1024;
@@ -311,7 +336,12 @@ function create(opts) {
     frame: mat({ color: lin(PAL.frame), spec: .95, shin: 80, rim: .9, fres: .45, cast: 0 }),
     lens: mat({ color: lin('#D6E4FF'), alpha: .10, spec: 1.5, shin: 140, fres: 1.2, recv: 0, cast: 0 }),
     glint: mat({ color: [1, 1, 1], alpha: .4, unlit: 1, recv: 0, cast: 0 }),
-    drop: mat({ color: [1, 1, 1], alpha: 0, unlit: 1, recv: 0, cast: 0, soft: .8 })
+    drop: mat({ color: [1, 1, 1], alpha: 0, unlit: 1, recv: 0, cast: 0, soft: .8 }),
+    emblem: mat({ color: [1, 1, 1], spec: .12, shin: 20, rim: .3 }),
+    cap: mat({ color: lin('#2C3751'), spec: .2, shin: 26, rim: .7, fres: .06 }),
+    brim: mat({ color: lin('#E4560A'), spec: .25, shin: 30, rim: .4 }),
+    spark: mat({ color: [1, 1, 1], unlit: 1, recv: 0, cast: 0 }),
+    cloth: mat({ color: lin('#E9600A'), spec: .05, shin: 10, rim: .12, fres: .02 })
   };
   const CLIP = [0, 1, 0, -99];
 
@@ -328,16 +358,36 @@ function create(opts) {
   const headPivot = group(root, [0, 1.5, 0]);
   const head = group(headPivot, [0, .93, 0]);   // head centre sits at y = 2.43
 
-  /* ----- torso and arms ----- */
-  add(body, rbox(3.0, 2.2, 1.4, .3), M.tee, [0, .4, 0]);
-  add(body, rbox(1.2, .16, .8, .5), M.teeDk, [0, 1.46, .02]);            // collar line
+  /* ----- torso and arms: narrow enough that both arms sit fully inside the frame ----- */
+  add(body, rbox(2.5, 2.2, 1.4, .3), M.tee, [0, .4, 0]);
+  add(body, rbox(3.1, .55, 1.25, .3), M.tee, [0, 1.22, 0]);               // shoulder bridge: closes the notch between torso and sleeves
+  add(body, rbox(1.2, .16, .8, .5), M.teeDk, [0, 1.47, .02]);            // collar line
   const arms = [-1, 1].map((sd) => {
-    const g = group(body, [sd * 1.95, 1.3, 0]);
-    add(g, rbox(.95, 1.1, .95, .3), M.tee, [sd * .05, -.1, 0]);
-    add(g, rbox(.85, 1.3, .85, .3), M.skin, [sd * .05, -1.0, 0]);
+    const g = group(body, [sd * 1.58, 1.3, 0]);
+    g.sl = add(g, rbox(.74, .8, .8, .34), M.tee, [0, -.18, 0]);          // sleeve, top level with the shoulder line
+    const el = group(g, [0, -.58, 0]);                                   // elbow: the forearm bends here when he waves
+    add(el, rbox(.46, .5, .46, .22), M.skin, [0, -.25, 0]);                  // forearm
+    const hd = group(el, [0, -.64, 0]);                                  // hand: palm, thumb and a finger line
+    add(hd, rbox(.62, .5, .52, .26), M.skin, [0, 0, 0]);
+    add(hd, rbox(.22, .36, .28, .12), M.skin, [-sd * .33, .04, .2]);       // thumb on the inner side
+    g.el = el; g.hd = hd;
     return g;
   });
   const hand = arms[1];
+  const clothG = group(body, [0, 2.5, 1.6]); clothG.vis = false;                         // the polishing cloth: orange with a white stripe
+  add(clothG, rbox(1.04, .8, .1, .12), M.cloth);
+  add(clothG, rbox(1.04, .1, .12, .04), M.tee, [0, .27, .01]);
+  const logoQuad = (w) => ({ pos: new Float32Array([-w / 2, -w / 2, 0, w / 2, -w / 2, 0, w / 2, w / 2, 0, -w / 2, w / 2, 0]), nor: new Float32Array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1]),
+    col: new Float32Array([0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0]), idx: new Uint16Array([0, 1, 2, 0, 2, 3]) });
+  M.logo = mat({ color: [1, 1, 1], tex: 1, alpha: .998, unlit: 2, recv: 0, cast: 0 });
+  const emblem = group(body, [0, .8, .722]); emblem.vis = false;                    // RoundU tee: the real logo on the chest
+  add(emblem, logoQuad(1.2), M.logo);
+  const hoodie = group(body); hoodie.vis = false;                                    // hoodie: draped hood, strings, pocket
+  [-1, 1].forEach((sd) => {
+    add(hoodie, rbox(.95, .5, .5, .5), M.teeDk, [sd * .52, 1.2, .62], [0, 0, -sd * .5]);
+    add(hoodie, rbox(.075, .5, .075, .8), M.emblem, [sd * .2, .85, .86]);
+  });
+  add(hoodie, rbox(1.5, .55, .14, .35), M.teeDk, [0, .05, .74]);
 
   /* ----- head: a rounded block ----- */
   const HHW = 1.0, HHH = .95, HHD = .9;
@@ -377,27 +427,38 @@ function create(opts) {
 
   /* ----- glasses: large rounded navy frames ----- */
   const GZ = FZ + .12, LX = .5, LY = .12;
+  const glassG = group(head);
   const lensPts = (a, b) => { const out = [], N = 48; for (let i = 0; i < N; i++) { const t = 2 * Math.PI * i / N, c = Math.cos(t), sn = Math.sin(t); out.push([a * Math.sign(c) * Math.pow(Math.abs(c), .7), b * Math.sign(sn) * Math.pow(Math.abs(sn), .7) * (sn > 0 ? .92 : 1.04), 0]); } return out; };
   const lensPath = lensPts(.43, .35), inner = lensPts(.39, .31);
   [-1, 1].forEach((sd) => {
-    const g = group(head, [sd * LX, LY, GZ]);
+    const g = group(glassG, [sd * LX, LY, GZ]);
     add(g, sweepG(lensPath, true, .036, .05, [0, 0, 1], 10), M.frame);
     add(g, polyG(inner, -.01), M.lens);
     add(g, polyG([[-.28, .12], [-.2, .12], [-.04, .26], [-.12, .26]], .005), M.glint);
     add(g, polyG([[-.32, .02], [-.29, .02], [-.22, .08], [-.25, .08]], .005), M.glint);
-    add(head, sweepG(catmull([[sd * (LX + .43), LY, GZ - .02], [sd * 1.03, LY, GZ - .2], [sd * 1.05, LY, .3], [sd * 1.05, LY - .02, -.4]], 6, false), false, .03, .03, [0, 1, 0], 8), M.frame);
+    add(glassG, sweepG(catmull([[sd * (LX + .43), LY, GZ - .02], [sd * 1.03, LY, GZ - .2], [sd * 1.05, LY, .3], [sd * 1.05, LY - .02, -.4]], 6, false), false, .03, .03, [0, 1, 0], 8), M.frame);
   });
-  add(head, sweepG(catmull([[-.09, LY + .02, GZ], [-.055, LY + .14, GZ], [0, LY + .18, GZ], [.055, LY + .14, GZ], [.09, LY + .02, GZ]], 6, false), false, .03, .04, [0, 0, 1], 8), M.frame);
+  add(glassG, sweepG(catmull([[-.09, LY + .02, GZ], [-.055, LY + .14, GZ], [0, LY + .18, GZ], [.055, LY + .14, GZ], [.09, LY + .02, GZ]], 6, false), false, .03, .04, [0, 0, 1], 8), M.frame);
+
+  const starPts = []; for (let i = 0; i < 8; i++) { const a2 = Math.PI * i / 4 + Math.PI / 2, r = i % 2 ? .06 : .2; starPts.push([Math.cos(a2) * r, Math.sin(a2) * r]); }
+  const sparks = [[-.26, LY + .27, GZ + .14], [.74, LY + .27, GZ + .14]].map((q) => { const n = add(glassG, polyG(starPts, 0), M.spark, q, null, [.01, .01, 1]); n.vis = false; return n; });
 
   /* ----- hair: chunky black blocks, swept fringe ----- */
-  add(head, rbox(2.18, .7, 1.98, .38), M.hair, [0, .98, -.02]);
-  add(head, rbox(2.12, 1.6, .6, .38), M.hair, [0, .28, -.84]);
-  [-1, 1].forEach((sd) => add(head, rbox(.3, 1.0, 1.5, .38), M.hair, [sd * 1.0, .5, -.08]));
-  add(head, rbox(2.08, .4, .5, .4), M.hair, [0, .86, .84], [0, 0, -.08]);                // fringe
-  add(head, rbox(.8, .34, .5, .4), M.hair, [-.55, .74, .98], [0, 0, .18]);               // swept lock
-  add(head, rbox(.62, .6, .6, .4), M.hair, [.45, 1.38, .25], [0, 0, -.35]);
-  add(head, rbox(.58, .56, .56, .4), M.hair, [-.2, 1.42, .3], [0, 0, -.12]);
-  add(head, rbox(.54, .5, .54, .4), M.hair, [-.75, 1.28, .2], [0, 0, .25]);
+  const hairG = group(head);
+  add(hairG, rbox(2.18, .7, 1.98, .38), M.hair, [0, .98, -.02]);
+  add(hairG, rbox(2.12, 1.6, .6, .38), M.hair, [0, .28, -.84]);
+  [-1, 1].forEach((sd) => add(hairG, rbox(.3, 1.0, 1.5, .38), M.hair, [sd * 1.0, .5, -.08]));
+  add(hairG, rbox(2.08, .4, .5, .4), M.hair, [0, .86, .84], [0, 0, -.08]);                // fringe
+  add(hairG, rbox(.8, .34, .5, .4), M.hair, [-.55, .74, .98], [0, 0, .18]);               // swept lock
+  const tufts = [[.62, .6, .6, [.45, 1.38, .25], -.35], [.58, .56, .56, [-.2, 1.42, .3], -.12], [.54, .5, .54, [-.75, 1.28, .2], .25]].map((q) => ({ n: add(hairG, rbox(q[0], q[1], q[2], .4), M.hair, q[3], [0, 0, q[4]]), z: q[4], y: q[3][1] }));
+
+
+  /* ----- cap (hidden until worn) ----- */
+  const capG = group(head); capG.vis = false;
+  add(capG, rbox(2.26, 1.0, 2.2, .62), M.cap, [0, 1.22, -.04]);
+  add(capG, rbox(1.5, .12, 1.1, .6), M.brim, [0, .9, 1.34], [.16, 0, 0]);
+  add(capG, disc, M.emblem, [0, 1.34, 1.085], null, [.2, .2, 1]);
+  add(capG, logoQuad(.33), M.logo, [0, 1.34, 1.1]);
 
   /* ----- sneeze droplets ----- */
   const dropG = sphereG(1, 10, 7), drops = [];
@@ -418,6 +479,36 @@ function create(opts) {
     yawn: { mw: .16, mup: 0, masym: 0, wob: 0, ow: .17, oh: .34, tooth: 0, tong: 1, cy: MYr - .05 }
   };
   const look = { x: 0, y: 0, tx: 0, ty: 0 }, turn = { x: 0, y: 0, roll: 0 };
+  const A = { clean: -1, bounce: -1, spin: -1, nod: -1, pop: -1 }, DUR = { clean: 3.8, bounce: 1.3, spin: 1.15, nod: .7, pop: .5 };
+  let leanT = 0, leanC = 0, outfitN = 0, wantEmblem = false;
+  const OUTFITS = [
+    { tee: '#F4F6FB', dk: '#DDE3EF' },
+    { tee: '#F4F6FB', dk: '#DDE3EF', emblem: 1 },
+    { tee: '#2E3A57', dk: '#232D45', hoodie: 1 },
+    { tee: '#F4F6FB', dk: '#DDE3EF', cap: 1 }
+  ];
+  function setOutfit(i) {
+    outfitN = ((i % OUTFITS.length) + OUTFITS.length) % OUTFITS.length; const o = OUTFITS[outfitN];
+    M.tee.color = lin(o.tee); M.teeDk.color = lin(o.dk);
+    emblem.vis = !!o.emblem && logoReady; wantEmblem = !!o.emblem; hoodie.vis = !!o.hoodie; capG.vis = !!o.cap; tufts.forEach((t) => { t.n.vis = !o.cap; });
+    return outfitN;
+  }
+  const ease = (x) => x * x * (3 - 2 * x);
+  /* small vector helpers and a two-bone solver so a hand can reach the glasses */
+  const v3 = { sub: (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]], add: (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]], mul: (a, k) => [a[0] * k, a[1] * k, a[2] * k],
+    dot: (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2], len: (a) => Math.hypot(a[0], a[1], a[2]) };
+  v3.norm = (a) => v3.mul(a, 1 / (v3.len(a) || 1));
+  const aimDown = (u) => { const s2 = Math.hypot(u[0], u[2]); return [Math.atan2(-s2, -u[1]), Math.atan2(u[0], u[2]), 0]; };   // rx, ry that turn "down" into u
+  const rotM = (r) => { const cx = Math.cos(r[0]), sx = Math.sin(r[0]), cy = Math.cos(r[1]), sy = Math.sin(r[1]), cz = Math.cos(r[2]), sz = Math.sin(r[2]);
+    const a = [[cz, -sz, 0], [cx * sz, cx * cz, -sx], [sx * sz, sx * cz, cx]];
+    return [[cy * a[0][0] + sy * a[2][0], cy * a[0][1] + sy * a[2][1], cy * a[0][2] + sy * a[2][2]], a[1], [-sy * a[0][0] + cy * a[2][0], -sy * a[0][1] + cy * a[2][1], -sy * a[0][2] + cy * a[2][2]]]; };
+  const mulR = (R, v) => [R[0][0] * v[0] + R[0][1] * v[1] + R[0][2] * v[2], R[1][0] * v[0] + R[1][1] * v[1] + R[1][2] * v[2], R[2][0] * v[0] + R[2][1] * v[1] + R[2][2] * v[2]];
+  const mulT = (R, v) => [R[0][0] * v[0] + R[1][0] * v[1] + R[2][0] * v[2], R[0][1] * v[0] + R[1][1] * v[1] + R[2][1] * v[2], R[0][2] * v[0] + R[1][2] * v[1] + R[2][2] * v[2]];
+  const solve2 = (P, T, L1, L2, pole) => {
+    const d = v3.sub(T, P), dh = v3.norm(d), dist = Math.min(v3.len(d), (L1 + L2) * .995), a = (L1 * L1 - L2 * L2 + dist * dist) / (2 * dist), hh = Math.sqrt(Math.max(0, L1 * L1 - a * a));
+    const n = v3.norm(v3.sub(pole, v3.mul(dh, v3.dot(pole, dh)))), E = v3.add(v3.add(P, v3.mul(dh, a)), v3.mul(n, hh)), H = v3.add(P, v3.mul(dh, dist));
+    return { u: v3.norm(v3.sub(E, P)), f: v3.norm(v3.sub(H, E)), hand: H };
+  };
   let snap = 0, blinkT = 2.5, blinkP = -1, noseTw = 0;
   function setState(s) {
     const e = EYE[s.eye] || EYE.open; tgt.ey = e[0]; tgt.er = e[1];
@@ -429,7 +520,7 @@ function create(opts) {
   Object.keys(tgt).forEach((k) => { cur[k] = Array.isArray(tgt[k]) ? tgt[k].slice() : tgt[k]; });
 
   /* ----- per-frame ----- */
-  const camY = 2.484, camD = 14, fov = 2 * Math.atan(camY / camD), eye = [0, camY, camD];
+  const camY = 2.2, viewH = 2.6, camD = 14, fov = 2 * Math.atan(viewH / camD), eye = [0, camY, camD];   // frame runs from y = -0.4 (room for long arms) up past the hair
   let W = 0, H = 0, last = 0, running = true, onNose = opts.onNose || null;
   function resize() {
     const d = Math.min(opts.maxDpr || 2, global.devicePixelRatio || 1), cw = canvas.clientWidth, ch = canvas.clientHeight;
@@ -439,6 +530,7 @@ function create(opts) {
     return true;
   }
   const lerp = (a, b, k) => a + (b - a) * k;
+  const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
   function step(dt, t) {
     const k = 1 - Math.exp(-dt * 13);
     ['ey', 'er', 'mw', 'mup', 'masym', 'wob', 'ow', 'oh', 'cy', 'tooth', 'tong', 'hand', 'tilt', 'nose'].forEach((key) => { cur[key] = lerp(cur[key], tgt[key], key === 'ey' ? 1 - Math.exp(-dt * 20) : k); });
@@ -450,9 +542,52 @@ function create(opts) {
     snap = Math.max(0, snap - dt * 1.6);
     const sn = Math.sin(snap * Math.PI) * snap;
     const br = Math.sin(t * 1.3) * .03;
-    body.p = [-turn.x * .08, br, 0]; body.s = [1, 1 + Math.sin(t * 1.3) * .004, 1];
-    headPivot.p = [-turn.x * .04, 1.5 + br * 1.2 - sn * .12, sn * .1];
-    headPivot.r = [turn.y * .15 + .02 * Math.sin(t * .7) + sn * .5, turn.x * .34 + .015 * Math.sin(t * .5), -(cur.tilt * Math.PI / 180) * .8 - turn.roll * Math.PI / 180];
+    Object.keys(A).forEach((k) => { if (A[k] >= 0) { A[k] += dt / DUR[k]; if (A[k] >= 1) A[k] = -1; } });
+    leanC = lerp(leanC, leanT, 1 - Math.exp(-dt * 7));
+    const spinA = A.spin >= 0 ? ease(A.spin) * Math.PI * 2 : 0, hop = A.spin >= 0 ? Math.sin(Math.PI * A.spin) * .28 : 0;
+    const nodA = A.nod >= 0 ? Math.sin(Math.PI * 2 * A.nod) * (1 - A.nod) * .3 : 0;
+    const pop = A.pop >= 0 ? 1 + Math.sin(Math.PI * A.pop) * .06 : 1;
+    body.p = [-turn.x * .08, br + hop, leanC * .12]; body.s = [pop, pop * (1 + Math.sin(t * 1.3) * .004), pop]; body.r = [0, spinA, 0];
+    headPivot.p = [-turn.x * .04, 1.5 + br * 1.2 - sn * .12 - leanC * .05 + hop, sn * .1 + leanC * .34];
+    headPivot.r = [turn.y * .15 + .02 * Math.sin(t * .7) + sn * .5 + nodA + leanC * .1, turn.x * .34 + .015 * Math.sin(t * .5) + spinA, -(cur.tilt * Math.PI / 180) * .8 - turn.roll * Math.PI / 180];
+    // arms: at rest unless a wave or the glasses polish is driving them
+    arms.forEach((g, i) => { const sd = i ? 1 : -1; g.p = [sd * 1.58, 1.3, 0]; g.r = [0, 0, 0]; g.sl.p = [0, -.18, 0]; g.sl.s = [1, 1, 1]; g.el.p = [0, -.58, 0]; g.el.r = [0, 0, 0]; });
+    const hv = cur.hand; hand.p[0] = 1.58 - .2 * hv; hand.r = [0, 0, hv * 2.85]; hand.el.r = [0, 0, hv * (.29 + Math.sin(t * 6.5) * .28)];
+    // glasses: he takes a cloth and polishes the right lens, then the left, and they sparkle at the end
+    if (A.clean >= 0) {
+      const q = A.clean, SY = 1.4, L1 = .58 * SY, L2 = .64;
+      const wR = q < .07 ? ease(q / .07) : q < .5 ? 1 : q < .58 ? 1 - ease((q - .5) / .08) : 0;
+      const wL = q < .46 ? 0 : q < .54 ? ease((q - .46) / .08) : q < .88 ? 1 : 1 - ease((q - .88) / .1);
+      const Rh = rotM(headPivot.r), hp = headPivot.p, bp = body.p;
+      const wipe = (sd, w, ph) => {
+        const sw = Math.sin(ph * Math.PI * 12), sy = 1 + (SY - 1) * w;
+        const lens = mulR(Rh, [sd * (.5 + .27 * sw), .93 + .08 + .05 * Math.cos(ph * Math.PI * 12), 1.52]);          // palm sits just in front of the lens
+        const T = [hp[0] + lens[0] - bp[0], hp[1] + lens[1] - bp[1], hp[2] + lens[2] - bp[2]], P = [sd * 1.1, 1.4, .78];
+        const sol = solve2(P, T, L1, L2, [sd * .7, -.7, .2]), ru = aimDown(sol.u), er = aimDown(mulT(rotM(ru), sol.f)), g = arms[sd > 0 ? 1 : 0];
+        g.p = [lerp(sd * 1.58, P[0], w), lerp(1.3, P[1], w), lerp(0, P[2], w)];
+        g.r = [ru[0] * w, ru[1] * w, 0]; g.el.p = [0, -.58 * sy, 0]; g.el.r = [er[0] * w, er[1] * w, 0];
+        const h = (.22 + .58 * sy) / .8; g.sl.s = [1, h, 1]; g.sl.p = [0, .22 - h * .4, 0];
+        return { T, sw, lens };
+      };
+      let c1 = null, c2 = null;
+      if (wR > 0) c1 = wipe(1, wR, clamp((q - .07) / .43, 0, 1));
+      if (wL > 0) c2 = wipe(-1, wL, clamp((q - .54) / .34, 0, 1));
+      const use = wL > wR ? c2 : c1, kk = wL > wR ? wL : wR;
+      if (use) {
+        const sd = use === c1 ? 1 : -1, cs = clamp((kk - .25) / .6, 0, 1);                                   // the cloth rides along with the hand as it lifts and lowers
+        clothG.vis = cs > .03; clothG.p = [lerp(sd * 1.58, use.T[0], kk), lerp(.1, use.T[1] - .03, kk), lerp(.3, use.T[2] - .3, kk)]; clothG.r = [0, 0, use.sw * .2]; clothG.s = [cs, cs, cs];
+      } else clothG.vis = false;
+      const wig = (wR > .6 || wL > .6) ? Math.sin(t * 34) * .014 : 0;
+      glassG.p = [wig, 0, 0]; glassG.r = [0, 0, wig * 1.5];
+      const sp = q > .86 ? Math.sin(Math.PI * Math.min(1, (q - .86) / .14)) : 0;
+      sparks.forEach((n, i) => { n.vis = sp > .02; const k = sp * (i ? 1.1 : 1.4); n.s = [k, k, 1]; n.r = [0, 0, q * 5 * (i ? -1 : 1)]; });
+    } else { clothG.vis = false; glassG.p = [0, 0, 0]; glassG.r = [0, 0, 0]; sparks.forEach((n) => { n.vis = false; }); }
+    // hair: a springy bounce
+    if (A.bounce >= 0) {
+      const q = A.bounce, env = Math.pow(1 - q, 1.4), w = Math.sin(q * Math.PI * 5);
+      hairG.p = [0, Math.abs(w) * .16 * env, 0]; hairG.s = [1 - w * .02 * env, 1 + w * .06 * env, 1 - w * .02 * env];
+      tufts.forEach((tf, i) => { tf.n.r = [0, 0, tf.z + Math.sin(q * 30 + i * 1.7) * .42 * env]; });
+    } else { hairG.p = [0, 0, 0]; hairG.s = [1, 1, 1]; tufts.forEach((tf) => { tf.n.r = [0, 0, tf.z]; }); }
     eyes.forEach((e) => {
       e.g.p[0] = e.sd * .5 + look.x * .07; e.g.p[1] = .12 - look.y * .05;
       e.e.s = [.13 * (1 + (1 - ey) * .25), Math.max(.012, .2 * ey), 1]; e.e.r = [0, 0, -e.sd * cur.er * Math.PI / 180];
@@ -470,7 +605,6 @@ function create(opts) {
       const th = Math.max(.01, cur.tooth); teeth.vis = cur.tooth > .05; teeth.p = [0, cur.cy + oh * .55, .004]; teeth.s = [ow * .82, oh * .32 * th, 1];
       const tg = Math.max(.01, cur.tong); tongue.vis = cur.tong > .05; tongue.p = [0, cur.cy - oh * .55, .004]; tongue.s = [ow * .6 * Math.min(1, tg + .2), oh * .38 * tg, 1];
     }
-    const hv = cur.hand; hand.p[0] = 1.95 - .42 * hv; hand.r = [0, 0, hv * 3.0 + Math.sin(t * 6.5) * .2 * hv];
     drops.forEach((d) => {
       if (d.life <= 0) { d.n.vis = false; return; }
       d.life -= dt; d.v[1] -= dt * 1.6; d.n.p = [d.n.p[0] + d.v[0] * dt, d.n.p[1] + d.v[1] * dt, d.n.p[2] + d.v[2] * dt];
@@ -484,7 +618,7 @@ function create(opts) {
     const g = (n, a, b, c) => { if (U[n] != null) gl.uniform3f(U[n], a, b, c); };
     gl.uniform3f(U.uColor, m.color[0], m.color[1], m.color[2]); gl.uniform3f(U.uEmis, m.emis[0], m.emis[1], m.emis[2]);
     gl.uniform1f(U.uAlpha, m.alpha); gl.uniform1f(U.uSpec, m.spec); gl.uniform1f(U.uShin, m.shin); gl.uniform1f(U.uRim, m.rim); gl.uniform1f(U.uFres, m.fres);
-    gl.uniform1f(U.uSss, m.sss); gl.uniform1f(U.uUnlit, m.unlit); gl.uniform1f(U.uSoft, m.soft); gl.uniform1f(U.uRecv, shadowOK ? m.recv : 0); gl.uniform1f(U.uVcol, m.vcol); gl.uniform1f(U.uClipOn, m.clip);
+    gl.uniform1f(U.uSss, m.sss); gl.uniform1f(U.uUnlit, m.unlit); gl.uniform1f(U.uSoft, m.soft); gl.uniform1f(U.uRecv, shadowOK ? m.recv : 0); gl.uniform1f(U.uVcol, m.vcol); gl.uniform1f(U.uClipOn, m.clip); gl.uniform1f(U.uTexOn, m.tex || 0);
   }
   function render() {
     const list = []; gather(root, list);
@@ -505,7 +639,7 @@ function create(opts) {
     gl.uniform3fv(U.uKeyDir, LIGHT.key); gl.uniform3fv(U.uKeyCol, LIGHT.keyCol); gl.uniform3fv(U.uFillDir, LIGHT.fill); gl.uniform3fv(U.uFillCol, LIGHT.fillCol);
     gl.uniform3fv(U.uRimDir, LIGHT.rimDir); gl.uniform3fv(U.uRimCol, LIGHT.rimCol); gl.uniform3fv(U.uSky, LIGHT.sky); gl.uniform3fv(U.uGround, LIGHT.ground);
     gl.uniform4f(U.uClip, CLIP[0], CLIP[1], CLIP[2], CLIP[3]); gl.uniform1f(U.uExposure, opts.exposure || .95); gl.uniform1f(U.uShadowSize, SS);
-    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, stex); gl.uniform1i(U.uShadow, 0);
+    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, logoTex); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, stex); gl.uniform1i(U.uShadow, 0); gl.uniform1i(U.uTex, 1);
     gl.enable(gl.DEPTH_TEST); gl.depthMask(true); gl.disable(gl.BLEND);
     const draw = (n) => { gl.uniformMatrix4fv(U.uModel, false, n.world); gl.uniformMatrix3fv(U.uNormal, false, M4.normalMat(n.world)); setMat(U, n.m); gl.bindVertexArray(n.mesh.vao); gl.drawElements(gl.TRIANGLES, n.mesh.n, n.mesh.type, 0); };
     opaque.forEach(draw);
@@ -517,7 +651,7 @@ function create(opts) {
       const p = [noseG.world[12], noseG.world[13] + .0, noseG.world[14] + .22];
       const cx = vp[0] * p[0] + vp[4] * p[1] + vp[8] * p[2] + vp[12], cy = vp[1] * p[0] + vp[5] * p[1] + vp[9] * p[2] + vp[13], cw = vp[3] * p[0] + vp[7] * p[1] + vp[11] * p[2] + vp[15];
       const sx = (cx / cw * .5 + .5) * canvas.clientWidth, sy = (1 - (cy / cw * .5 + .5)) * canvas.clientHeight;
-      const pxPerUnit = canvas.clientHeight / (2 * camY * (camD - p[2]) / camD);
+      const pxPerUnit = canvas.clientHeight / (2 * viewH * (camD - p[2]) / camD);
       onNose(sx, sy, .42 * pxPerUnit);
     }
   }
@@ -545,7 +679,12 @@ function create(opts) {
       });
     },
     poke() { noseTw = 1; },
+    act(name) { if (name in A) A[name] = 0; },
+    lean(v) { leanT = Math.max(0, Math.min(1, v || 0)); },
+    outfit(i) { const n = setOutfit(i == null ? outfitN + 1 : i); A.pop = 0; return n; },
+    outfitCount: OUTFITS.length,
     pause(v) { running = !v; },
+    advance(sec) { for (let k = 0; k < Math.round(sec / .016); k++) step(.016, k * .016); },
     frameOnce(t) { if (!resize()) return; step(.016, t || 0); render(); },
     destroy() { cancelAnimationFrame(raf); }
   };
